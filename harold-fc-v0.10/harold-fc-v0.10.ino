@@ -5,6 +5,7 @@
 
 sensors_event_t IMUData;
 const int MAXTILT = 45;
+const int MAXYAW = 150;
 
 
 struct Ryp {

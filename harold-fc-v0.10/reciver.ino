@@ -1,26 +1,26 @@
 void initReciver() {
-  ch1.pin = 12;
+  ch1.pin = 12;     //set all pwm pins to their channel's pin variable
   ch2.pin = 18;
   ch3.pin = 17;
   ch4.pin = 16;
   ch5.pin = 15;
   ch6.pin = 14;
 
-  pinMode(ch1.pin, INPUT);
+  pinMode(ch1.pin, INPUT);    //set all channel's pins to input
   pinMode(ch2.pin, INPUT);
   pinMode(ch3.pin, INPUT);
   pinMode(ch4.pin, INPUT);
   pinMode(ch5.pin, INPUT);
   pinMode(ch6.pin, INPUT);
 
-  attachInterrupt(ch1.pin, sigChange1, CHANGE);
+  attachInterrupt(ch1.pin, sigChange1, CHANGE);   //attach all interputs
   attachInterrupt(ch2.pin, sigChange2, CHANGE);
   attachInterrupt(ch3.pin, sigChange3, CHANGE);
   attachInterrupt(ch4.pin, sigChange4, CHANGE);
   attachInterrupt(ch5.pin, sigChange5, CHANGE);
   attachInterrupt(ch6.pin, sigChange6, CHANGE);
 
-  ch1.pulse = digitalRead(ch1.pin);
+  ch1.pulse = digitalRead(ch1.pin);     //set boolean pulse variable to current state of the channels pin
   ch2.pulse = digitalRead(ch2.pin);
   ch3.pulse = digitalRead(ch3.pin);
   ch4.pulse = digitalRead(ch4.pin);
@@ -54,18 +54,18 @@ void updateReciver(int *throttle, int *yaw, int *pitch, int *roll, int *mode, bo
     ch6.pulseWidth = ch6.lastPulseWidth;
   }
 
-  *throttle = constrain(map(ch3.pulseWidth, 1000, 2000, 0, 255), 0, 255);
-  *yaw = map(ch4.pulseWidth, 1000, 2000, -150, 150);
-  *pitch = constrain(map(ch2.pulseWidth, 1000, 2000, -MAXTILT, MAXTILT), -MAXTILT, MAXTILT);
-  *roll = constrain(map(ch1.pulseWidth, 1000, 2000, -MAXTILT, MAXTILT), -MAXTILT, MAXTILT);
-  *mode = constrain(map(ch6.pulseWidth, 1000, 2000, 1, 3), 1, 3);
-  if (ch5.pulseWidth > 1500) {
+  *throttle = constrain(map(ch3.pulseWidth, 1000, 2000, 0, 255), 0, 255);   //map & constrain the pulse width of ch3 to between 0 & 255 then set it to *throttle
+  *yaw = map(ch4.pulseWidth, 1000, 2000, -MAXYAW, MAXYAW);    //map the pulse width of ch4 to between negitive maxyaw and positive maxyaw and set it to *yaw
+  *pitch = constrain(map(ch2.pulseWidth, 1000, 2000, -MAXTILT, MAXTILT), -MAXTILT, MAXTILT);    //map & constrain the pulse width of ch2 to between -maxtilt and positive maxilt then set it to *pitch
+  *roll = constrain(map(ch1.pulseWidth, 1000, 2000, -MAXTILT, MAXTILT), -MAXTILT, MAXTILT);   //map & constrain the pulse width of ch1 to between -maxtilt and positive maxilt then set it to *roll
+  *mode = constrain(map(ch6.pulseWidth, 1000, 2000, 1, 3), 1, 3);   //map and constrain the pulse width of ch6 to 1-3 and set to *mode
+  if (ch5.pulseWidth > 1500) {      //if the pulse width of ch5 is higher then 1500 (center) *arm is flase 
     *arm = false;
-  } else {
+  } else {          //else *arm is true
     *arm = true;
   }
 
-  ch1.lastPulseWidth = ch1.pulseWidth;
+  ch1.lastPulseWidth = ch1.pulseWidth;    //set last pulsewidths
   ch2.lastPulseWidth = ch2.pulseWidth;
   ch3.lastPulseWidth = ch3.pulseWidth;
   ch4.lastPulseWidth = ch4.pulseWidth;
