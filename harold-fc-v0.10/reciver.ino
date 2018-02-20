@@ -55,10 +55,12 @@ void updateReciver(int *throttle, int *yaw, int *pitch, int *roll, int *mode, bo
   }
 
   *throttle = constrain(map(ch3.pulseWidth, 1000, 2000, 0, 255), 0, 255);   //map & constrain the pulse width of ch3 to between 0 & 255 then set it to *throttle
-  *yaw = map(ch4.pulseWidth, 1000, 2000, -MAXYAW, MAXYAW);    //map the pulse width of ch4 to between negitive maxyaw and positive maxyaw and set it to *yaw
-  *pitch = constrain(map(ch2.pulseWidth, 1000, 2000, -MAXTILT, MAXTILT), -MAXTILT, MAXTILT);    //map & constrain the pulse width of ch2 to between -maxtilt and positive maxilt then set it to *pitch
-  *roll = constrain(map(ch1.pulseWidth, 1000, 2000, -MAXTILT, MAXTILT), -MAXTILT, MAXTILT);   //map & constrain the pulse width of ch1 to between -maxtilt and positive maxilt then set it to *roll
-  *mode = constrain(map(ch6.pulseWidth, 1000, 2000, 1, 3), 1, 3);   //map and constrain the pulse width of ch6 to 1-3 and set to *mode
+  if(modeState == 1){
+    *yaw = map(ch4.pulseWidth, 1000, 2000, -MAXYAW, MAXYAW);    //map the pulse width of ch4 to between negitive maxyaw and positive maxyaw and set it to *yaw
+    *pitch = constrain(map(ch2.pulseWidth, 1000, 2000, -MAXTILT, MAXTILT), -MAXTILT, MAXTILT);    //map & constrain the pulse width of ch2 to between -maxtilt and positive maxilt then set it to *pitch
+    *roll = constrain(map(ch1.pulseWidth, 1000, 2000, -MAXTILT, MAXTILT), -MAXTILT, MAXTILT);   //map & constrain the pulse width of ch1 to between -maxtilt and positive maxilt then set it to *roll
+  }
+*mode = constrain(map(ch6.pulseWidth, 1000, 2000, 1, 3), 1, 3);   //map and constrain the pulse width of ch6 to 1-3 and set to *mode
   if (ch5.pulseWidth > 1500) {      //if the pulse width of ch5 is higher then 1500 (center) *arm is flase 
     *arm = false;
   } else {          //else *arm is true

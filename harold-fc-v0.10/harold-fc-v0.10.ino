@@ -29,9 +29,9 @@ bool armState;
 int modeState;
 
 struct gain {
-  float P = 1;
-  float I = 1;
-  float D = 1;
+  float P;
+  float I;
+  float D;
 } pitchGain, rollGain, yawGain;
 
 float prvGyroX = 0;
