@@ -11,16 +11,7 @@ int FreeRam () {
   return &stack_dummy - sbrk(0);
 }
 
-
 sensors_event_t IMUData;
-const int MAXTILT = 45;
-const int MAXYAW = 150;
-const int MAXTHROTTLE = 50;
-const int MAXERRORS = MAXYAW + (2 * MAXTILT) + MAXTHROTTLE;
-const int MINERRORS = -MAXERRORS + MAXTHROTTLE;
-
-const int MINMOTOR = 0;
-const int MAXMOTOR = 0;
 
 struct Ryp {
   int pitch;

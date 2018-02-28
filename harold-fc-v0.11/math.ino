@@ -1,23 +1,35 @@
+void initGains(){
+  pitchGain.P = 1;
+  pitchGain.I = 0.5;
+  pitchGain.D = 0.2;
 
+  rollGain.P = 1;
+  rollGain.I = 0.5;
+  rollGain.D = 0.2;
+
+  yawGain.P = 1;
+  yawGain.P = 0.5;
+  yawGain.P = 0.4;
+}
 void doPID() {
   /*
      Calculate pitch error using PID
   */
   
   //find the difference between the gyro reading and the controller value and apply the P gain
-  errorPitchP = (IMUData.orientation.x - reciverData.pitch) * pitchGain.P;
+  errorPitchP = (-IMUData.orientation.y - reciverData.pitch) * pitchGain.P;
   
   //add the previous I error to the difference between gyro reading and controller value after applying I gain. Effectivly adding the amount of time not centered to the error
-  errorPitchI = prvErrorPitchI + ((IMUData.orientation.x - reciverData.pitch) * pitchGain.I);
+  errorPitchI = prvErrorPitchI + ((-IMUData.orientation.y - reciverData.pitch) * pitchGain.I);
   
   //find the how fast the differnce between gyro reading and reciver value is changeing and applying D gain
-  errorPitchD = ((IMUData.orientation.x - reciverData.pitch) - (prvGyroX - prvReciverPitch)) * pitchGain.D;
+  errorPitchD = ((-IMUData.orientation.y - reciverData.pitch) - (-prvGyroY - prvReciverPitch)) * pitchGain.D;
 
   //combine P, I & D. The higher this number is the +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++====
   errorPitch = errorPitchP + errorPitchI + errorPitchD;
   
   //set all the "previous" pitch values
-  prvGyroX = IMUData.orientation.x;
+  prvGyroY = IMUData.orientation.y;
   prvReciverPitch = reciverData.pitch;
   prvErrorPitchI = errorPitchI;
 

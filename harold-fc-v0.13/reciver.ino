@@ -31,47 +31,44 @@ void initReciver() {
 void updateReciver(int *throttle, int *yaw, int *pitch, int *roll, byte *mode, bool *arm) {
 
   if (ch1.pulseWidth > 2010 || ch1.pulseWidth < 990) {
-    ch1.pulseWidth = ch1.lastPulseWidth;
+    ch1.pulseWidth = ch1.prvPulseWidth;
   }
 
   if (ch2.pulseWidth > 2010 || ch2.pulseWidth < 990) {
-    ch2.pulseWidth = ch2.lastPulseWidth;
+    ch2.pulseWidth = ch2.prvPulseWidth;
   }
 
   if (ch3.pulseWidth > 2010 || ch3.pulseWidth < 990) {
-    ch3.pulseWidth = ch3.lastPulseWidth;
+    ch3.pulseWidth = ch3.prvPulseWidth;
   }
 
   if (ch4.pulseWidth > 2010 || ch4.pulseWidth < 990) {
-    ch4.pulseWidth = ch4.lastPulseWidth;
+    ch4.pulseWidth = ch4.prvPulseWidth;
   }
 
   if (ch5.pulseWidth > 2000 || ch5.pulseWidth < 990) {
-    ch5.pulseWidth = ch5.lastPulseWidth;
+    ch5.pulseWidth = ch5.prvPulseWidth;
   }
 
   if (ch6.pulseWidth > 2000 || ch6.pulseWidth < 990) {
-    ch6.pulseWidth = ch6.lastPulseWidth;
+    ch6.pulseWidth = ch6.prvPulseWidth;
   }
 
-  *throttle = constrain(map(ch3.pulseWidth, 1000, 2000, 0, MAXTHROTTLE), 0, MAXTHROTTLE);   //map & constrain the pulse width of ch3 to between 0 & 255 then set it to *throttle
-  *yaw = map(ch4.pulseWidth, 1000, 2000, -MAXYAW, MAXYAW);    //map the pulse width of ch4 to between negitive maxyaw and positive maxyaw and set it to *yaw
-  *pitch = constrain(map(ch2.pulseWidth, 1000, 2000, -MAXTILT, MAXTILT), -MAXTILT, MAXTILT);    //map & constrain the pulse width of ch2 to between -maxtilt and positive maxilt then set it to *pitch
-  *roll = constrain(map(ch1.pulseWidth, 1000, 2000, -MAXTILT, MAXTILT), -MAXTILT, MAXTILT);   //map & constrain the pulse width of ch1 to between -maxtilt and positive maxilt then set it to *roll
-  *mode = constrain(map(ch6.pulseWidth, 1000, 2000, 1, 3), 1, 3);   //map and constrain the pulse width of ch6 to 1-3 and set to *mode
   
-  if (ch5.pulseWidth > 1500) {      //if the pulse width of ch5 is higher then 1500 (center) *arm is flase
+  
+  *mode = constrain(map(ch6.pulseWidth, 1000, 2000, 1, 3), 1, 3);   //map and constrain the pulse width of ch6 to 1-3 and set to *mode
+    if (ch5.pulseWidth > 1500) {      //if the pulse width of ch5 is higher then 1500 (center) *arm is flase
     *arm = false;
   } else {          //else *arm is true
     *arm = true;
   }
 
-  ch1.lastPulseWidth = ch1.pulseWidth;    //set last pulsewidths
-  ch2.lastPulseWidth = ch2.pulseWidth;
-  ch3.lastPulseWidth = ch3.pulseWidth;
-  ch4.lastPulseWidth = ch4.pulseWidth;
-  ch5.lastPulseWidth = ch5.pulseWidth;
-  ch6.lastPulseWidth = ch6.pulseWidth;
+  ch1.prvPulseWidth = ch1.pulseWidth;    //set previous pulsewidths
+  ch2.prvPulseWidth = ch2.pulseWidth;
+  ch3.prvPulseWidth = ch3.pulseWidth;
+  ch4.prvPulseWidth = ch4.pulseWidth;
+  ch5.prvPulseWidth = ch5.pulseWidth;
+  ch6.prvPulseWidth = ch6.pulseWidth;
 }
 
 
