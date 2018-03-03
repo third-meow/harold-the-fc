@@ -39,6 +39,8 @@ void initReceiver() {
 
 void updateReceiver(int *throttle, int *yaw, int *pitch, int *roll, byte *mode, bool *arm) {
 
+  prvReceiverData = receiverData;
+  
   if (ch1.pulseWidth > (RC_CH1_MAX + 15) || ch1.pulseWidth < (RC_CH1_MIN - 15)) {
     ch1.pulseWidth = ch1.prvPulseWidth;
   }

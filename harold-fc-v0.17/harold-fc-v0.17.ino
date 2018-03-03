@@ -33,6 +33,10 @@ int FreeRam () {
 imu::Vector<3> gyro;
 //orientation data (degrees)
 imu::Vector<3> euler;
+//previous gyro data (degrees/s)
+imu::Vector<3> prvGyro;
+//previous orientation data (degrees)
+imu::Vector<3> prvEuler;
 
 //current and previous pitch, yaw, roll and thottle values from receiver
 struct Pytr {
@@ -41,6 +45,8 @@ struct Pytr {
   int yaw;
   int throttle;
 } receiverData, prvReceiverData;
+
+int yawTarget = 0;
 
 //has every variable you need for a PWM input
 struct PWMinput {
@@ -55,11 +61,14 @@ struct PWMinput {
 bool armState = false; //starts unarmed
 byte modeState; //holds mode (0,1,2)
 
+//manual yaw gain used when yaw not locked, to turn on the yaw axis at the correct pace
+float manualYawGain;
+
 //holds gains
 struct Gain {
-  byte pitch[2];
-  byte yaw[2];
-  byte roll[2];
+  float pitch[2];
+  float yaw[2];
+  float roll[2];
 } rateGains, stabGains; //gains for rate and stabilisation PID
 
 //holds P, I, D & PID errors for pitch, yaw and roll
@@ -70,7 +79,7 @@ struct Error {
   float prvYaw_I;
   float roll[3];
   float prvRoll_I;
-} rateErrors, stabErrors; //errors for both rate and stabilisation PIDs
+} rateErrors, stabErrors, prvStabErrors; //errors for both rate and stabilisation PIDs
 
 //holds if built-in LED is off or on
 bool ledState = false;
@@ -100,6 +109,8 @@ void loop() {
   updateIMU();
   //read RC receiver
   updateReceiver(&receiverData.throttle, &receiverData.yaw, &receiverData.pitch, &receiverData.roll, &modeState, &armState);
+
+  
 }
 
 

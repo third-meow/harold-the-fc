@@ -3,6 +3,8 @@ int initIMU() {
   {
     delay(200);
     godwit.setExtCrystalUse(true);
+    updateIMU();
+    updateIMU();
     return 1;
   }
   else {
@@ -12,6 +14,8 @@ int initIMU() {
 
 
 void updateIMU() {
-  gyro = godwit.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE) * 180/PI;
+  prvGyro = gyro;
+  prvEuler = euler;
+  gyro = godwit.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE) * 180 / PI;
   euler = godwit.getVector(Adafruit_BNO055::VECTOR_EULER);
 }

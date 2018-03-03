@@ -39,6 +39,8 @@ void initReceiver() {
 
 void updateReceiver(int *throttle, int *yaw, int *pitch, int *roll, byte *mode, bool *arm) {
 
+  prvReceiverData = receiverData;
+  
   if (ch1.pulseWidth > (RC_CH1_MAX + 15) || ch1.pulseWidth < (RC_CH1_MIN - 15)) {
     ch1.pulseWidth = ch1.prvPulseWidth;
   }
@@ -69,7 +71,7 @@ void updateReceiver(int *throttle, int *yaw, int *pitch, int *roll, byte *mode, 
   *pitch = map(ch2.pulseWidth, RC_CH2_MIN, RC_CH2_MAX, -MAXPITCH, MAXPITCH);
   if (abs(*pitch) < 5) *pitch = 0;
   
-  *throttle = ch3.pulseWidth;
+  *throttle = map(ch3.pulseWidth, RC_CH3_MIN, RC_CH3_MAX, RC_CH3_MIN, (RC_CH3_MAX*0.7));
   
   *yaw = map(ch4.pulseWidth, RC_CH4_MIN, RC_CH4_MAX, -180, 180);
   if (abs(*yaw) < 5) *yaw = 0;
