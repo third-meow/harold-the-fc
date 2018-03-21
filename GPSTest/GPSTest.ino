@@ -11,20 +11,20 @@ Adafruit_GPS pigeon(&Serial1);
 float lat;
 float lng;
 float altitude;
-int sats;
-int fixq;
+uint8_t sats;
+uint8_t fixq;
 
-long updateStartTime;
-int updateTime;
-int updateTimeMax;
-long readStartTime;
-int readTime;
-int readTimeMax;
+uint16_t updateStartTime;
+uint16_t updateTime;
+uint16_t updateTimeMax;
+uint16_t readStartTime;
+uint16_t readTime;
+uint16_t readTimeMax;
 
-unsigned long fastLoopLength;
-unsigned long fastLoopStart = 0;
-unsigned long slowLoopLength;
-unsigned long slowLoopStart = 0;
+uint16_t fastLoopLength;
+uint16_t fastLoopStart = 0;
+uint16_t slowLoopLength;
+uint16_t slowLoopStart = 0;
 
 void setup()
 {
@@ -36,7 +36,7 @@ void setup()
 
 void loop()
 {
-  unsigned long fastLoopEnd = micros();
+  uint16_t fastLoopEnd = micros();
   fastLoopLength = fastLoopEnd - fastLoopStart;
 
   if (fastLoopLength > FASTLOOPTARGET)
@@ -54,7 +54,7 @@ void loop()
       }*/
   }
 
-  unsigned long slowLoopEnd = millis();
+  uint16_t slowLoopEnd = millis();
   slowLoopLength = slowLoopEnd - slowLoopStart;
 
   if (slowLoopLength > SLOWLOOPTARGET) {
@@ -98,7 +98,7 @@ void GPSinit() {
   Serial1.println(PMTK_Q_RELEASE);
 }
 
-void updateGPS(float *lat, float *lng, float *alt, int *sats, int *fixq) {
+void updateGPS(float *lat, float *lng, float *alt, uint8_t *sats, uint8_t *fixq) {
   if (pigeon.newNMEAreceived()) {
     if (!pigeon.parse(pigeon.lastNMEA()))
       return;
