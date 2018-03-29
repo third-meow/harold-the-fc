@@ -16,6 +16,8 @@
 #define RC_CH5_MAX 1988
 #define RC_CH6_MIN 999
 #define RC_CH6_MAX 2000
+#define RC_CH7_MIN 991
+#define RC_CH7_MAX 1985
 
 #define MAXROLL 45
 #define MAXPITCH -45
@@ -50,13 +52,13 @@ int16_t yawTarget = 0;
 
 //has every variable you need for a PWM input
 struct PWMinput {
-  int8_t pin;  //the input pin
+  uint8_t pin;  //the input pin
   volatile bool pulse;  //the pulse "state" (during pulse or waiting for pulse)
   volatile uint32_t startPulse;  //to hold pulse start time in micros since reset
   volatile uint32_t endPulse;  //to hold pulse end time in micros since reset
   volatile uint16_t pulseWidth;  //to hold pulse width in microseconds
   uint16_t prvPulseWidth; //to hold previous pulse width
-} ch1, ch2, ch3, ch4, ch5, ch6;   //create 6 channels
+} ch1, ch2, ch3, ch4, ch5, ch6, ch7;   //create 7 channels
 
 bool armState = false; //starts unarmed
 uint8_t modeState; //holds mode (0,1,2)
@@ -96,6 +98,14 @@ void setup() {
   //start serial at 500,000 buad
   Serial.begin(500000);
 
+  for(int i = 0; i < 2000; i++){
+    delay(1);
+    if (Serial){
+      Serial.println("Serial connection detected");
+      break;
+    }
+  }
+
   //initiate receiver, motors & inertial measurement unit
   Serial.println("Initializing Reciver");
   if (!initReceiver()) {
@@ -123,6 +133,7 @@ void setup() {
     delay(1000);
   }
   Serial.println("About to Arm Motors!");
+  digitalWrite(LED_BUILTIN, LOW);
   if (!initMotors()) {
     Serial.println("Motor initalization error");
     while (true) {}
@@ -140,7 +151,7 @@ void loop() {
   //run PIDS
   doPIDs();
 
-  Serial.println(ch4.pulseWidth);
+  Serial.println(ch7.pulseWidth);
   
   //if throttle is not below 50
   if (receiverData.throttle >= (RC_CH3_MIN + 20)) {

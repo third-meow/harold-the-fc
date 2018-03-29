@@ -102,12 +102,10 @@ void sigChange1() {
     ch1.endPulse = micros();
     ch1.pulseWidth = ch1.endPulse - ch1.startPulse;
     ch1.pulse = !ch1.pulse;
-  }
-  else {
+  }else {
     ch1.startPulse = micros();
     ch1.pulse = !ch1.pulse;
   }
-
 }
 
 
@@ -116,12 +114,10 @@ void sigChange2() {
     ch2.endPulse = micros();
     ch2.pulseWidth = ch2.endPulse - ch2.startPulse;
     ch2.pulse = !ch2.pulse;
-  }
-  else {
+  }else {
     ch2.startPulse = micros();
     ch2.pulse = !ch2.pulse;
   }
-
 }
 
 
@@ -130,41 +126,32 @@ void sigChange3() {
     ch3.endPulse = micros();
     ch3.pulseWidth = ch3.endPulse - ch3.startPulse;
     ch3.pulse = !ch3.pulse;
-  }
-  else {
+  }else {
     ch3.startPulse = micros();
     ch3.pulse = !ch3.pulse;
   }
-
 }
-
-
 
 void sigChange4() {
   if (ch4.pulse) {
     ch4.endPulse = micros();
     ch4.pulseWidth = ch4.endPulse - ch4.startPulse;
     ch4.pulse = !ch4.pulse;
-  }
-  else {
+  }else {
     ch4.startPulse = micros();
     ch4.pulse = !ch4.pulse;
   }
-
 }
-
 
 void sigChange5() {
   if (ch5.pulse) {
     ch5.endPulse = micros();
     ch5.pulseWidth = ch5.endPulse - ch5.startPulse;
     ch5.pulse = !ch5.pulse;
-  }
-  else {
+  }else {
     ch5.startPulse = micros();
     ch5.pulse = !ch5.pulse;
   }
-
 }
 
 
@@ -173,10 +160,8 @@ void sigChange6() {
     ch6.endPulse = micros();
     ch6.pulseWidth = ch6.endPulse - ch6.startPulse;
     ch6.pulse = !ch6.pulse;
-  }
-  else {
+  }else {
     ch6.startPulse = micros();
     ch6.pulse = !ch6.pulse;
   }
-
 }

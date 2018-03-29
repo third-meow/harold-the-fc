@@ -96,6 +96,14 @@ void setup() {
   //start serial at 500,000 buad
   Serial.begin(500000);
 
+  for(int i = 0; i < 2000; i++){
+    delay(1);
+    if (Serial){
+      Serial.println("Serial connection detected");
+      break;
+    }
+  }
+
   //initiate receiver, motors & inertial measurement unit
   Serial.println("Initializing Reciver");
   if (!initReceiver()) {
@@ -123,6 +131,7 @@ void setup() {
     delay(1000);
   }
   Serial.println("About to Arm Motors!");
+  digitalWrite(LED_BUILTIN, LOW);
   if (!initMotors()) {
     Serial.println("Motor initalization error");
     while (true) {}
