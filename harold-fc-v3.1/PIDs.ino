@@ -39,6 +39,7 @@ void setPrvI(){
   rateErrors.prvRoll_I = rateErrors.roll[1];
   rateErrors.prvYaw_I = rateErrors.yaw[1]; 
 }
+
 void doPIDs() {
   rateErrors.pitch[0] = (receiverData.pitch - gyro.x()) * rateGains.pitch[0];
   rateErrors.pitch[1] = rateErrors.prvPitch_I + ((receiverData.pitch - gyro.x()) * rateGains.pitch[1]);

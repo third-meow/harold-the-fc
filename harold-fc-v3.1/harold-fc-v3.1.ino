@@ -16,8 +16,8 @@
 #define RC_CH5_MAX 1988
 #define RC_CH6_MIN 999
 #define RC_CH6_MAX 2000
-#define RC_CH7_MIN 991
-#define RC_CH7_MAX 1985
+
+#define LED_INSIDE PC13
 
 #define MAXROLL 14
 #define MAXPITCH -14
@@ -58,7 +58,7 @@ struct PWMinput {
   volatile uint32_t endPulse;  //to hold pulse end time in micros since reset
   volatile uint16_t pulseWidth;  //to hold pulse width in microseconds
   uint16_t prvPulseWidth; //to hold previous pulse width
-} ch1, ch2, ch3, ch4, ch5, ch6, ch7;   //create 7 channels
+} ch1, ch2, ch3, ch4, ch5, ch6;   //create 6 channels
 
 bool armState = false; //starts unarmed
 uint8_t modeState; //holds mode (0,1,2)
@@ -90,39 +90,21 @@ Servo frontLeftMotor;
 Servo frontRightMotor;
 Servo backLeftMotor;
 Servo backRightMotor;
-
+ 
 void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
+  Serial.begin();
+  serialStartup();
   
-  //start serial at 500,000 buad
-  Serial.begin(500000);
+  pinMode(LED_INSIDE, OUTPUT);
+  writeLED(false);
 
-  for(int i = 0; i < 2000; i++){
-    delay(1);
-    if (Serial){
-      Serial.println("Serial connection detected");
-      break;
-    }
-  }
-
-  //initiate receiver, motors & inertial measurement unit
-  Serial.println("Initializing Reciver");
-  if (!initReceiver()) {
-    Serial.println("Reciver initalization error");
-    while (true) {}
-  }
-
-  Serial.println("Initializing IMU");
-  if (!initIMU()) {
-    Serial.println("IMU initalization error");
-    while (true) {}
-  }
+  initReceiver();
+  initIMU();
   
   //set all PID gains
   setGains();
 
-  Serial.println("Waiting on arming signal");
+  writeLED(true);
   while (armState == false) {
     updateReceiver(&receiverData.throttle,
                    &receiverData.yaw,
@@ -132,37 +114,37 @@ void setup() {
                    &armState);
     delay(1000);
   }
-  Serial.println("About to Arm Motors!");
-  digitalWrite(LED_BUILTIN, LOW);
-  if (!initMotors()) {
-    Serial.println("Motor initalization error");
-    while (true) {}
-  }
-  //allow everything a second to start
-  delay(1000);
+  
+  initMotors();
 
+  //allow everything a second to start
+  writeLED(false);
+  delay(1000);
+  writeLED(true);
 }
 
 void loop() {
   //read inertial measurement unit
   updateIMU();
+  
   //read RC receiver
   updateReceiver(&receiverData.throttle, &receiverData.yaw, &receiverData.pitch, &receiverData.roll, &modeState, &armState);
+  
   //run PIDS
   doPIDs();
 
-  Serial.print(rateErrors.pitch[3]);
-  Serial.print("\t");
-  Serial.print(rateErrors.yaw[3]);
-  Serial.print("\t");
-  Serial.println(rateErrors.roll[3]);
+  Serial.print(receiverData.throttle);
+  Serial.print("\t"); Serial.print(ch2.pulseWidth); 
+  Serial.print("\t"); Serial.print(receiverData.roll); 
+  Serial.print("\t"); Serial.print(receiverData.yaw); 
+  Serial.print("\t"); Serial.print(euler.x()); 
+  Serial.print("\t"); Serial.print(euler.y()); 
+  Serial.print("\t"); Serial.println(euler.z());
 
-  
-    
   //if throttle is not below 20
   if (receiverData.throttle >= (RC_CH3_MIN + 20)) {
     //send data from PIDS to motors
-    sendMotors();
+    //sendMotors();
   } else {
     //send off signal to motors
     stopMotors();
@@ -171,7 +153,6 @@ void loop() {
     //reset intergrals
     resetI();
   }
-
 }
 
 
