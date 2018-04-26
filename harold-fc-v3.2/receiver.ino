@@ -1,36 +1,41 @@
 bool initReceiver() {
   /*
-   *  This code makes use of STM32F103's Input Capture Mode. This is a 
-   *  mode that timers on the STM32F103 can use. It 'captures' and stores 
-   *  the time (since last reboot) an event happens then runs an interrupt to 
-   *  do something with the infomation. 
-   * 
-   *  Each timer only has 4 channels and my RC receiver has 6 channels so
-   *  I will be using timer 2 and 3 in this program. Timer 2 takes four channels 
-   *  on pins PA0, PA1, PA2 and PA3 while timer 3 takes two channels on pins 
-   *  PA6 and PA7. If I need more channels in the future I can utilise 
-   *  timer 3's other two channels
-   *  
-   *  To use input capture mode on the STM32F103 we 
-   * 
-   *  -attach interrupt handlers
-   *  -set timers' counter enable bit (turns on in-cap-mode)
-   *  -enable interrupts on both timers for their respective channels
-   *  -connect input channels to edge detectors
-   *  -set inital trigger edge in edge detector to be raising
-   *  -set each timers' prescaler value and auto-reload vlaue
-   *  -clear timers' other regitsors   
-   * 
-   *  When an interrupt handler is run we cheak if the channel is currently high
-   * 
-   *  If so we record the value in the channel's capture compare registor
-   *  (where the 'time' of edge detector is stored) and set the edge detector to now 
-   *  lookout for a falling edge
-   * 
-   *  If not, the channel is low so we compare the start time already recorded to current value 
-   *  found in the channel's capture compare registor
-   * 
-   */
+      This code makes use of STM32F103's Input Capture Mode. This is a
+      mode that timers on the STM32F103 can use. It 'captures' and stores
+      the time (since last reboot) an event happens then runs an interrupt to
+      do something with the infomation.
+
+      Each timer only has 4 channels and my RC receiver has 6 channels so
+      I will be using timer 2 and 3 in this program. Timer 2 takes four channels
+      on pins PA0, PA1, PA2 and PA3 while timer 3 takes two channels on pins
+      PA6 and PA7. If I need more channels in the future I can utilise
+      timer 3's other two channels
+
+      To use input capture mode on the STM32F103 we
+
+      -attach interrupt handlers
+      -set timers' counter enable bit (turns on in-cap-mode)
+      -enable interrupts on both timers for their respective channels
+      -connect input channels to edge detectors
+      -set inital trigger edge in edge detector to be raising
+      -set each timers' prescaler value and auto-reload vlaue
+      -clear timers' other regitsors
+
+      When an interrupt handler is run we cheak if the channel is currently high
+
+      If so we record the value in the channel's capture compare registor
+      (where the 'time' of edge detector is stored) and set the edge detector to now
+      lookout for a falling edge
+
+      If not, the channel is low so we compare the start time already recorded to current value
+      found in the channel's capture compare registor to get the length of the pulse, or the pusle width
+      then we set the edge detector to now lookout for a falling edge
+
+      For more infomation on howto use input capture mode,
+      see the referance manual: https://tinyurl.com/refman4bluepill and
+      an amazing YouTube video by Joop Brokking : https://youtu.be/JFSFbSg0l2M
+
+  */
 
   //attach interrupt handlers
   Timer2.attachCompare1Interrupt(sigChange1);
@@ -107,71 +112,69 @@ void updateReceiver(uint16_t *throttle, int16_t *yaw, int8_t *pitch, int8_t *rol
 
 
 void sigChange1() {
-  if (ch1.pulse) {
-    ch1.endPulse = micros();
-    ch1.pulseWidth = ch1.endPulse - ch1.startPulse;
-    ch1.pulse = !ch1.pulse;
-  } else {
-    ch1.startPulse = micros();
-    ch1.pulse = !ch1.pulse;
+  //if channel is high
+  if (0b1 & GPIOA_BASE->IDR  >> 0) {
+    //record start time and set edge detector trigger to falling
+    ch1.pulseStart = TIMER2_BASE->CCR1;
+    TIMER2_BASE->CCER |= TIMER_CCER_CC1P;
+  }
+  else {
+    //calculate pulse width and set edge detector trigger to raising
+    ch1.pulseWidth = TIMER2_BASE->CCR1 - ch1.pulseStart;
+    if (ch1.pulseWidth < 0) {
+      ch1.pulseWidth += 65535;
+    }
+    TIMER2_BASE->CCER &= ~TIMER_CCER_CC1P;
   }
 }
 
 
 void sigChange2() {
-  if (ch2.pulse) {
-    ch2.endPulse = micros();
-    ch2.pulseWidth = ch2.endPulse - ch2.startPulse;
-    ch2.pulse = !ch2.pulse;
-  } else {
-    ch2.startPulse = micros();
-    ch2.pulse = !ch2.pulse;
+  //if channel is high
+  if (0b1 & GPIOA_BASE->IDR  >> 1) {
+    //record start time and set edge detector trigger to falling
+    ch2.pulseStart = TIMER2_BASE->CCR2;
+    TIMER2_BASE->CCER |= TIMER_CCER_CC2P;
+  }
+  else {
+    //calculate pulse width and set edge detector trigger to raising
+    ch2.pulseWidth = TIMER2_BASE->CCR2 - ch2.pulseStart;
+    if (ch2.pulseWidth < 0) {
+      ch2.pulseWidth += 65535;
+    }
+    TIMER2_BASE->CCER &= ~TIMER_CCER_CC2P;
   }
 }
 
 
 void sigChange3() {
-  if (ch3.pulse) {
-    ch3.endPulse = micros();
-    ch3.pulseWidth = ch3.endPulse - ch3.startPulse;
-    ch3.pulse = !ch3.pulse;
-  } else {
-    ch3.startPulse = micros();
-    ch3.pulse = !ch3.pulse;
+  //if channel is high
+  if (0b1 & GPIOA_BASE->IDR  >> 2) {
+    //record start time and set edge detector trigger to falling
+    ch3.pulseStart = TIMER2_BASE->CCR3;
+    TIMER2_BASE->CCER |= TIMER_CCER_CC3P;
   }
+  else {
+    //calculate pulse width and set edge detector trigger to raising
+    ch3.pulseWidth = TIMER2_BASE->CCR3 - ch3.pulseStart;
+    if (ch3.pulseWidth < 0) {
+      ch3.pulseWidth += 65535;
+    }
+    TIMER2_BASE->CCER &= ~TIMER_CCER_CC3P;
+  }
+
 }
 
 void sigChange4() {
-  if (ch4.pulse) {
-    ch4.endPulse = micros();
-    ch4.pulseWidth = ch4.endPulse - ch4.startPulse;
-    ch4.pulse = !ch4.pulse;
-  } else {
-    ch4.startPulse = micros();
-    ch4.pulse = !ch4.pulse;
-  }
+
 }
 
 void sigChange5() {
-  if (ch5.pulse) {
-    ch5.endPulse = micros();
-    ch5.pulseWidth = ch5.endPulse - ch5.startPulse;
-    ch5.pulse = !ch5.pulse;
-  } else {
-    ch5.startPulse = micros();
-    ch5.pulse = !ch5.pulse;
-  }
+
 }
 
 
 void sigChange6() {
-  if (ch6.pulse) {
-    ch6.endPulse = micros();
-    ch6.pulseWidth = ch6.endPulse - ch6.startPulse;
-    ch6.pulse = !ch6.pulse;
-  } else {
-    ch6.startPulse = micros();
-    ch6.pulse = !ch6.pulse;
-  }
+
 }
 
