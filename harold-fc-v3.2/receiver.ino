@@ -108,19 +108,16 @@ void updateReceiver(uint16_t *throttle, int16_t *yaw, int8_t *pitch, int8_t *rol
   }
 }
 
-
-
-
 void sigChange1() {
   //if channel is high
   if (0b1 & GPIOA_BASE->IDR  >> 0) {
     //record start time and set edge detector trigger to falling
-    ch1.pulseStart = TIMER2_BASE->CCR1;
+    ch1.startPulse = TIMER2_BASE->CCR1;
     TIMER2_BASE->CCER |= TIMER_CCER_CC1P;
   }
   else {
     //calculate pulse width and set edge detector trigger to raising
-    ch1.pulseWidth = TIMER2_BASE->CCR1 - ch1.pulseStart;
+    ch1.pulseWidth = TIMER2_BASE->CCR1 - ch1.startPulse;
     if (ch1.pulseWidth < 0) {
       ch1.pulseWidth += 65535;
     }
@@ -133,12 +130,12 @@ void sigChange2() {
   //if channel is high
   if (0b1 & GPIOA_BASE->IDR  >> 1) {
     //record start time and set edge detector trigger to falling
-    ch2.pulseStart = TIMER2_BASE->CCR2;
+    ch2.startPulse = TIMER2_BASE->CCR2;
     TIMER2_BASE->CCER |= TIMER_CCER_CC2P;
   }
   else {
     //calculate pulse width and set edge detector trigger to raising
-    ch2.pulseWidth = TIMER2_BASE->CCR2 - ch2.pulseStart;
+    ch2.pulseWidth = TIMER2_BASE->CCR2 - ch2.startPulse;
     if (ch2.pulseWidth < 0) {
       ch2.pulseWidth += 65535;
     }
@@ -151,30 +148,68 @@ void sigChange3() {
   //if channel is high
   if (0b1 & GPIOA_BASE->IDR  >> 2) {
     //record start time and set edge detector trigger to falling
-    ch3.pulseStart = TIMER2_BASE->CCR3;
+    ch3.startPulse = TIMER2_BASE->CCR3;
     TIMER2_BASE->CCER |= TIMER_CCER_CC3P;
   }
   else {
     //calculate pulse width and set edge detector trigger to raising
-    ch3.pulseWidth = TIMER2_BASE->CCR3 - ch3.pulseStart;
+    ch3.pulseWidth = TIMER2_BASE->CCR3 - ch3.startPulse;
     if (ch3.pulseWidth < 0) {
       ch3.pulseWidth += 65535;
     }
     TIMER2_BASE->CCER &= ~TIMER_CCER_CC3P;
   }
-
 }
 
 void sigChange4() {
-
+  //if channel is high
+  if (0b1 & GPIOA_BASE->IDR  >> 3) {
+    //record start time and set edge detector trigger to falling
+    ch4.startPulse = TIMER2_BASE->CCR4;
+    TIMER2_BASE->CCER |= TIMER_CCER_CC4P;
+  }
+  else {
+    //calculate pulse width and set edge detector trigger to raising
+    ch4.pulseWidth = TIMER2_BASE->CCR4 - ch4.startPulse;
+    if (ch4.pulseWidth < 0) {
+      ch4.pulseWidth += 65535;
+    }
+    TIMER2_BASE->CCER &= ~TIMER_CCER_CC4P;
+  }
 }
 
 void sigChange5() {
-
+  //if channel is high
+  if (0b1 & GPIOA_BASE->IDR >> 6) {
+    //record start time and set edge detector trigger to falling
+    ch5.startPulse = TIMER3_BASE->CCR1;
+    TIMER3_BASE->CCER |= TIMER_CCER_CC1P;
+  }
+  else {
+    //calculate pulse width and set edge detector trigger to raising
+    ch5.pulseWidth = TIMER3_BASE->CCR1 - ch5.startPulse;
+    if (ch5.pulseWidth < 0) {
+      ch5.pulseWidth += 65535;
+    }
+    TIMER3_BASE->CCER &= ~TIMER_CCER_CC1P;
+  }
 }
 
 
 void sigChange6() {
-
+  //if channel is high
+  if (0b1 & GPIOA_BASE->IDR >> 7) {
+    //record start time and set edge detector trigger to falling
+    ch6.startPulse = TIMER3_BASE->CCR2;
+    TIMER3_BASE->CCER |= TIMER_CCER_CC2P;
+  }
+  else {
+    //calculate pulse width and set edge detector trigger to raising
+    ch6.pulseWidth = TIMER3_BASE->CCR2 - ch6.startPulse;
+    if (ch6.pulseWidth < 0) {
+      ch6.pulseWidth += 65535;
+    }
+    TIMER3_BASE->CCER &= ~TIMER_CCER_CC2P;
+  }
 }
 
