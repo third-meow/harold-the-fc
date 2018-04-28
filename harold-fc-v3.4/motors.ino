@@ -1,4 +1,4 @@
-int initMotors() {
+bool initMotors() {
   //attach all motors to their respective pins
   frontLeftMotor.attach(PA10);
   frontRightMotor.attach(PA9);
@@ -36,7 +36,7 @@ int initMotors() {
   backLeftMotor.writeMicroseconds(RC_CH3_MIN + 100);
   backRightMotor.writeMicroseconds(RC_CH3_MIN + 100);
 
-  return 1;
+  return true;
 }
 
 void sendMotors() {

@@ -34,10 +34,10 @@ void loop() {
 }
 int initMotors() {
   //attach all motors to their respective pins
-  frontLeftMotor.attach(PA1);
-  frontRightMotor.attach(PA2);
-  backLeftMotor.attach(PA3);
-  backRightMotor.attach(PA6);
+  frontLeftMotor.attach(PA10);
+  frontRightMotor.attach(PA9);
+  backLeftMotor.attach(PB1);
+  backRightMotor.attach(PA8);
   delay(2600);
 
   //set all motors low
