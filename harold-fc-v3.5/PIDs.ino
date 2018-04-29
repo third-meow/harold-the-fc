@@ -10,9 +10,9 @@ void resetYawTarget() {
   yawTarget = euler.x();
 }
 void setGains() {
-  rateGains.pitch[0] = 0.005;
-  rateGains.roll[0] = 0.005;
-  rateGains.yaw[0] = 0.005;
+  rateGains.pitch[0] = 0.025;
+  rateGains.roll[0] = 0.025;
+  rateGains.yaw[0] = 0.025;
 }
 
 void setPrvI(){
