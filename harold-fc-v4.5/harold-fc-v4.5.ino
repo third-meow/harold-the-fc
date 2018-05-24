@@ -37,15 +37,12 @@ uint8_t loopGoal = 4000;
 
 //gyro data (degrees/s)
 imu::Vector<3> gyro;
-
-/*
 //orientation data (degrees)
 imu::Vector<3> euler;
 //previous gyro data (degrees/s)
 imu::Vector<3> prvGyro;
 //previous orientation data (degrees)
 imu::Vector<3> prvEuler;
-*/
 
 //current and previous pitch, yaw, roll and thottle values from receiver
 struct Pytr {
@@ -53,9 +50,9 @@ struct Pytr {
   int8_t roll;
   int16_t yaw;
   uint16_t throttle;
-} receiverData;
+} receiverData, prvReceiverData;
 
-//int16_t yawTarget = 0;
+int16_t yawTarget = 0;
 
 //has every variable you need for a PWM input
 struct PWMinput {
@@ -67,7 +64,7 @@ bool armState = false; //starts unarmed
 uint8_t modeState; //holds mode (0,1,2)
 
 //manual yaw gain used when yaw not locked, to turn on the yaw axis at the correct pace
-//float manualYawGain;
+float manualYawGain;
 
 //holds gains and maxs
 struct Gain {
@@ -77,14 +74,17 @@ struct Gain {
   uint16_t pitchMax[3];
   uint16_t yawMax[3];
   uint16_t rollMax[3];
-} rateGains; //gains for rate PID
+} rateGains, stabGains; //gains for rate and stabilisation PID
 
-//holds PID errors
+//holds P, I, D & PID errors for pitch, yaw and roll
 struct Error {
   float pitch[3];
+  float prvPitch_I;
   float yaw[3];
+  float prvYaw_I;
   float roll[3];
-} rateErrors; //errors for rate PID
+  float prvRoll_I;
+} rateErrors, stabErrors; //errors for both rate and stabilisation PIDs
 
 //setup BNO055
 Adafruit_BNO055 godwit = Adafruit_BNO055(19, 0x29);
@@ -93,8 +93,6 @@ Servo frontLeftMotor;
 Servo frontRightMotor;
 Servo backLeftMotor;
 Servo backRightMotor;
-
-
 
 
 void setup() {
@@ -147,21 +145,24 @@ void loop() {
     //run PIDS
     doPIDs();
 
-    Serial.print(rateErrors.pitch[3]);
+    Serial.print(euler.y());
     Serial.print("\t");
-    Serial.print(rateErrors.roll[3]);
+
+    Serial.print(euler.z());
     Serial.print("\t");
-    Serial.println(rateErrors.yaw[3]);
+
+    Serial.print(receiverData.roll);
+    Serial.println("\n");
 
     //if throttle is not below 20
     if (receiverData.throttle >= (RC_CH3_MIN + 20)) {
       //send data from PIDS to motors
-      sendMotors();
+      //sendMotors();
     } else {
       //send off signal to motors
-      stopMotors();
+      //stopMotors();
       //keep yawTarget from "locking" by reseting
-      //resetYawTarget();
+      resetYawTarget();
       //reset intergrals
       resetI();
     }

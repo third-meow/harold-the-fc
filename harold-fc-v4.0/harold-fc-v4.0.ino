@@ -37,15 +37,12 @@ uint8_t loopGoal = 4000;
 
 //gyro data (degrees/s)
 imu::Vector<3> gyro;
-
-/*
 //orientation data (degrees)
 imu::Vector<3> euler;
 //previous gyro data (degrees/s)
 imu::Vector<3> prvGyro;
 //previous orientation data (degrees)
 imu::Vector<3> prvEuler;
-*/
 
 //current and previous pitch, yaw, roll and thottle values from receiver
 struct Pytr {
@@ -53,9 +50,9 @@ struct Pytr {
   int8_t roll;
   int16_t yaw;
   uint16_t throttle;
-} receiverData;
+} receiverData, prvReceiverData;
 
-//int16_t yawTarget = 0;
+int16_t yawTarget = 0;
 
 //has every variable you need for a PWM input
 struct PWMinput {
@@ -67,24 +64,27 @@ bool armState = false; //starts unarmed
 uint8_t modeState; //holds mode (0,1,2)
 
 //manual yaw gain used when yaw not locked, to turn on the yaw axis at the correct pace
-//float manualYawGain;
+float manualYawGain;
 
 //holds gains and maxs
 struct Gain {
   float pitch[2];
   float yaw[2];
   float roll[2];
-  uint16_t pitchMax[3];
-  uint16_t yawMax[3];
-  uint16_t rollMax[3];
-} rateGains; //gains for rate PID
+  uint16_t pitchMax;
+  uint16_t yawMax;
+  uint16_t rollMax;
+} rateGains, stabGains; //gains for rate and stabilisation PID
 
-//holds PID errors
+//holds P, I, D & PID errors for pitch, yaw and roll
 struct Error {
   float pitch[3];
+  float prvPitch_I;
   float yaw[3];
+  float prvYaw_I;
   float roll[3];
-} rateErrors; //errors for rate PID
+  float prvRoll_I;
+} rateErrors, stabErrors, prvStabErrors; //errors for both rate and stabilisation PIDs
 
 //setup BNO055
 Adafruit_BNO055 godwit = Adafruit_BNO055(19, 0x29);
@@ -161,7 +161,7 @@ void loop() {
       //send off signal to motors
       stopMotors();
       //keep yawTarget from "locking" by reseting
-      //resetYawTarget();
+      resetYawTarget();
       //reset intergrals
       resetI();
     }
