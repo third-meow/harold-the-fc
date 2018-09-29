@@ -1,6 +1,0 @@
-void setGains(){
-}
-void doPID() {
-  
-}
-
