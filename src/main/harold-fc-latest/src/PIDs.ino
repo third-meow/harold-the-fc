@@ -12,17 +12,17 @@ void resetYawTarget() {
 }
 
 void setGains() {
-  stabGains.pitch[0] = 15;
+  stabGains.pitch[0] = 22;
   stabGains.pitch[1] = 0.0006;
   stabGains.pitch[2] = 3;
-  stabGains.roll[0] = 15;
+  stabGains.roll[0] = 22;
   stabGains.roll[1] = 0.0006;
   stabGains.roll[2] = 3;
   stabGains.yaw[0] = 10;
 
-  rateGains.pitch[0] = 0.009;
+  rateGains.pitch[0] = 0.01;
   rateGains.pitch[1] = 0.0000056;
-  rateGains.roll[0] = 0.009;
+  rateGains.roll[0] = 0.01;
   rateGains.roll[1] = 0.0000056;
   rateGains.yaw[0] = 0.013;
   rateGains.yaw[1] = 0.000144;
