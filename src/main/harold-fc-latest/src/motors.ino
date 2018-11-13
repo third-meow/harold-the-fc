@@ -41,15 +41,9 @@ bool initMotors() {
 
 void sendMotors() {
   frontLeftMotor.writeMicroseconds(receiverData.throttle + rateErrors.roll[3] + rateErrors.pitch[3] + rateErrors.yaw[3]);
-  frontRightMotor.writeMicroseconds(receiverData.throttle - rateErrors.roll[3] + rateErrors.pitch[3] - rateErrors.yaw[3]);
-  backLeftMotor.writeMicroseconds(receiverData.throttle + rateErrors.roll[3] - rateErrors.pitch[3] - rateErrors.yaw[3]);
+  //frontRightMotor.writeMicroseconds(receiverData.throttle - rateErrors.roll[3] + rateErrors.pitch[3] - rateErrors.yaw[3]);
+  //backLeftMotor.writeMicroseconds(receiverData.throttle + rateErrors.roll[3] - rateErrors.pitch[3] - rateErrors.yaw[3]);
   backRightMotor.writeMicroseconds(receiverData.throttle - rateErrors.roll[3] - rateErrors.pitch[3] + rateErrors.yaw[3]);
-
-  /*Serial.println(receiverData.throttle + rateErrors.roll[3] + rateErrors.pitch[3] - rateErrors.yaw[3]);
-  Serial.print("\t"); Serial.print(receiverData.throttle - rateErrors.roll[3] + rateErrors.pitch[3] + rateErrors.yaw[3]);
-  Serial.print("\t"); Serial.print(receiverData.throttle + rateErrors.roll[3] - rateErrors.pitch[3] + rateErrors.yaw[3]);
-  Serial.print("\t"); Serial.println(receiverData.throttle - rateErrors.roll[3] - rateErrors.pitch[3] - rateErrors.yaw[3]);*/
-
 }
 
 void stopMotors() {
@@ -58,4 +52,3 @@ void stopMotors() {
   backLeftMotor.writeMicroseconds(RC_CH3_MIN + 5);
   backRightMotor.writeMicroseconds(RC_CH3_MIN + 5);
 }
-
