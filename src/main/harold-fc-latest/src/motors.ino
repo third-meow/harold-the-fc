@@ -40,10 +40,10 @@ bool initMotors() {
 }
 
 void sendMotors() {
-  frontLeftMotor.writeMicroseconds(receiverData.throttle + rateErrors.roll[3] + rateErrors.pitch[3] + rateErrors.yaw[3]);
+  frontLeftMotor.writeMicroseconds(RC_CH3_MIN + 100 + rateErrors.roll[3] + rateErrors.pitch[3] + rateErrors.yaw[3]);
   //frontRightMotor.writeMicroseconds(receiverData.throttle - rateErrors.roll[3] + rateErrors.pitch[3] - rateErrors.yaw[3]);
   //backLeftMotor.writeMicroseconds(receiverData.throttle + rateErrors.roll[3] - rateErrors.pitch[3] - rateErrors.yaw[3]);
-  backRightMotor.writeMicroseconds(receiverData.throttle - rateErrors.roll[3] - rateErrors.pitch[3] + rateErrors.yaw[3]);
+  backRightMotor.writeMicroseconds(RC_CH3_MIN + 100- rateErrors.roll[3] - rateErrors.pitch[3] + rateErrors.yaw[3]);
 }
 
 void stopMotors() {
