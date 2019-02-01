@@ -2,9 +2,14 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 
+#include "Attitude.h"
+
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 Adafruit_BNO055 bno(19, 0x29);
-imu::Vector<3> gyro;
+Attitude gyro;
+
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 void flashDelay(int len) {
   digitalWrite(LED_BUILTIN, LOW);
@@ -12,6 +17,8 @@ void flashDelay(int len) {
   digitalWrite(LED_BUILTIN, HIGH);
   delay(len/2);
 }
+
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 //setup bno055
 void initIMU() {
@@ -34,6 +41,16 @@ void initIMU() {
     flashDelay(100);
   }
 }
+
+//read gyro values
+Attitude readGyro() {
+  imu::Vector<3> vec = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
+	Attitude att(vec.x(), vec.y(), vec.z());
+	return att;
+}
+
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
@@ -44,15 +61,18 @@ void setup() {
 
 }
 
-void loop() {
-  gyro = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-  Serial.print(gyro.x());
+void loop() {
+	gyro = readGyro();
+
+  Serial.print(gyro.pitch);
   Serial.print("\t");
-  Serial.print(gyro.y());
+  Serial.print(gyro.roll);
   Serial.print("\t");
-  Serial.print(gyro.z());
+  Serial.print(gyro.yaw);
   Serial.print("\n");
 }
+
 
 
