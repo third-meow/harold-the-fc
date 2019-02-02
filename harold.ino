@@ -1,3 +1,5 @@
+#include<Wire.h>
+#include<Servo.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
@@ -8,6 +10,12 @@
 
 Adafruit_BNO055 bno(19, 0x29);
 Attitude gyro;
+
+struct PWMinput {
+  volatile long startPulse;  //to hold pulse start time
+  volatile long pulseWidth;  //to hold pulse width in microseconds
+  
+} ch1, ch2, ch3, ch4, ch5, ch6;
 
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -59,20 +67,27 @@ void setup() {
   //setup bno055 gyro/accel
   initIMU();
 
+	//setup RC receiver
+	initReceiver();
+  
+  digitalWrite(LED_BUILTIN, HIGH);
+
+
 }
 
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 void loop() {
-	gyro = readGyro();
-
-  Serial.print(gyro.pitch);
+  Serial.print(1000);
   Serial.print("\t");
-  Serial.print(gyro.roll);
+  Serial.print(2000);
   Serial.print("\t");
-  Serial.print(gyro.yaw);
+  Serial.print(ch1.pulseWidth);
   Serial.print("\n");
+  delay(20);
 }
+
+
 
 
 
