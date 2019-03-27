@@ -37,17 +37,17 @@ void initIMU() {
 	}
 
 	bno.setExtCrystalUse(true);
-	/*while (true) {
+	while (true) {
 		Serial.println("BNO055 Calibrating");
 
 		uint8_t sys, gy, acl, mg = -1;
 		bno.getCalibration(&sys, &gy, &acl, &mg);
 
 		if (sys == 3 && gy == 3) {
-		break;
+			break;
 		}
 		flashDelay(100);
-		}*/
+	}
 }
 
 //read gyro values
@@ -92,7 +92,7 @@ void initMotors() {
 	digitalWrite(LED_BUILTIN, LOW);
 	delay(2600);
 
-	runMotors(300, 300);
+	runMotors(100, 100);
 	digitalWrite(LED_BUILTIN, HIGH);
 	delay(2000);
 	runMotors(0, 0);
@@ -109,9 +109,9 @@ float error;
 float prev_error;
 float pitch_p;
 float pitch_i;
-float max_i = 300;
+float max_i = 33;
 float pitch_d;
-float pid_output;
+float pitch_pid;
 
 
 void setup() {
@@ -127,12 +127,16 @@ void setup() {
 	}
 	digitalWrite(LED_BUILTIN, HIGH);
 
+  //setup receiver
+  initReceiver();
 	//setup motors
 	initMotors();
 
 
 	delay(3000);
 	lastTimeStamp = micros();
+
+	digitalWrite(LED_BUILTIN, HIGH);
 }
 
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -141,33 +145,39 @@ void setup() {
 void loop() {
 	if (micros() > (lastTimeStamp + LOOP_TIME)) {
 		Serial.println("TOO SLOW, LOOP TIME MET!. THIS IS BAD!");
-		while(true) {} 
+		while(true) {
+			flashDelay(2000);
+		} 
 	}
 	//wait for full loop time
 	while (micros() < (lastTimeStamp + LOOP_TIME)) {}
 	lastTimeStamp = micros();
 
 	gyro = readGyro();
-	//float desiredPitch = (double) map(ch2.pulseWidth, 1000, 2000, -360, 360);
-	float desiredPitch = 0.0;
+	float desiredPitch = (float) map(ch2.pulseWidth, 1000, 2000, -50, 50);
+	//float desiredPitch = 0.0;
 
 	error = desiredPitch - gyro.pitch;
 
-	pitch_p = error * 0.5;
+	pitch_p = error * 0.86;
 
-	pitch_i = pitch_i + (error * 0.005);
+	pitch_i = pitch_i + (error * 0.003);
 	if(pitch_i > max_i) pitch_i = max_i;
 	if(pitch_i < -max_i) pitch_i = -max_i;
 
-	pitch_d = (error - prev_error) * 0.05;
+	pitch_d = (error - prev_error) * 0.26;
 
-	pid_output = pitch_p + pitch_i + pitch_d;
-
-	runMotors(pid_output, -pid_output);
-
+	pitch_pid = pitch_p + pitch_i + pitch_d;
 
 	prev_error = error;
+
+	runMotors(110-pitch_pid, 110+pitch_pid);
 }
+
+
+
+
+
 
 
 
