@@ -61,26 +61,45 @@ Attitude readGyro() {
 
 Servo back;
 Servo front;
+Servo left;
+Servo right;
 
-void runMotors(int back_val, int front_val) {
-	back.writeMicroseconds(back_val + 1000);
-	front.writeMicroseconds(front_val + 1000);
+void setFrontMotor(int val) {
+	front.writeMicroseconds(val + 1000);
+}
+
+void setBackMotor(int val) {
+	back.writeMicroseconds(val + 1000);
+}
+
+void setLeftMotor(int val) {
+	left.writeMicroseconds(val + 1000);
+}
+
+void setRightMotor(int val) {
+	right.writeMicroseconds(val + 1000);
 }
 
 void initMotors() {
 	digitalWrite(LED_BUILTIN, LOW);
 	back.attach(PB1);
 	front.attach(PA10);
+	left.attach(PA9);
+	right.attach(PA8);
 	delay(2600);
 
 
 	back.writeMicroseconds(1000);
 	front.writeMicroseconds(1000);
+	left.writeMicroseconds(1000);
+	right.writeMicroseconds(1000);
 	delay(2600);
 
 	for(int i = 1000; i < 1500; i += 10) {
 		back.writeMicroseconds(i);
 		front.writeMicroseconds(i);
+		left.writeMicroseconds(i);
+		right.writeMicroseconds(i);
 	}
 	digitalWrite(LED_BUILTIN, HIGH);
 	delay(2600);
@@ -88,14 +107,22 @@ void initMotors() {
 	for(int i = 1490; i > 1000; i -= 10) {
 		back.writeMicroseconds(i);
 		front.writeMicroseconds(i);
+		left.writeMicroseconds(i);
+		right.writeMicroseconds(i);
 	}
 	digitalWrite(LED_BUILTIN, LOW);
 	delay(2600);
 
-	runMotors(100, 100);
+	setBackMotor(100);
+	setFrontMotor(100);
+	setLeftMotor(100);
+	setRightMotor(100);
 	digitalWrite(LED_BUILTIN, HIGH);
 	delay(2000);
-	runMotors(0, 0);
+	setBackMotor(0);
+	setFrontMotor(0);
+	setLeftMotor(0);
+	setRightMotor(0);
 	digitalWrite(LED_BUILTIN, LOW);
 }
 
@@ -105,14 +132,21 @@ void initMotors() {
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 unsigned long lastTimeStamp;
 
-float error;
-float prev_error;
+float max_i = 33;
+
+float pitch_error;
+float prev_pitch_error = 0.0;
 float pitch_p;
 float pitch_i;
-float max_i = 33;
 float pitch_d;
 float pitch_pid;
 
+float roll_error;
+float prev_roll_error = 0.0;
+float roll_p;
+float roll_i;
+float roll_d;
+float roll_pid;
 
 void setup() {
 	// initialize digital pin LED_BUILTIN as an output.
@@ -154,25 +188,34 @@ void loop() {
 	lastTimeStamp = micros();
 
 	gyro = readGyro();
-	float desiredPitch = (float) map(ch2.pulseWidth, 1000, 2000, -50, 50);
-	//float desiredPitch = 0.0;
+	float desired_pitch = (float) map(ch2.pulseWidth, 1000, 2000, -50, 50);
+	float desired_roll = (float) map(ch1.pulseWidth, 1000, 2000, -50, 50);
+	//float desired_roll = 0.0;
 
-	error = desiredPitch - gyro.pitch;
 
-	pitch_p = error * 0.86;
-
-	pitch_i = pitch_i + (error * 0.003);
+	pitch_error = desired_pitch - gyro.pitch;
+	pitch_p = pitch_error * 0.86;
+	pitch_i = pitch_i + (pitch_error * 0.003);
 	if(pitch_i > max_i) pitch_i = max_i;
 	if(pitch_i < -max_i) pitch_i = -max_i;
-
-	pitch_d = (error - prev_error) * 0.26;
-
+	pitch_d = (pitch_error - prev_pitch_error) * 0.26;
 	pitch_pid = pitch_p + pitch_i + pitch_d;
+	prev_pitch_error = pitch_error;
 
-	prev_error = error;
+	roll_error = desired_roll - gyro.roll;
+	roll_p = roll_error * 0.86;
+	roll_i = roll_i + (roll_error * 0.003);
+	if(roll_i > max_i) roll_i = max_i;
+	if(roll_i < -max_i) roll_i = -max_i;
+	roll_d = (roll_error - prev_roll_error) * 0.26;
+	roll_pid = roll_p + roll_i + roll_d;
+	prev_roll_error = roll_error;
 
-	runMotors(110-pitch_pid, 110+pitch_pid);
+	setLeftMotor(110 + roll_pid);
+	setRightMotor(110 - roll_pid);
 }
+
+
 
 
 
