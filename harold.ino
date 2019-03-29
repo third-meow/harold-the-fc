@@ -180,7 +180,7 @@ void loop() {
 	if (micros() > (lastTimeStamp + LOOP_TIME)) {
 		Serial.println("TOO SLOW, LOOP TIME MET!. THIS IS BAD!");
 		while(true) {
-			flashDelay(2000);
+			flashDelay(4000);
 		} 
 	}
 	//wait for full loop time
