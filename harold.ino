@@ -47,7 +47,6 @@ void initIMU() {
     flashDelay(100);
   }
 }
-
 // read gyro values
 Attitude readGyro() {
   imu::Vector<3> vec = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
@@ -116,16 +115,13 @@ void loop() {
   if (micros() > (lastTimeStamp + LOOP_TIME)) {
     while (true) {
       flashDelay(4000);
-
-      setLeftMotor(0);
-      setRightMotor(0);
-      setFrontMotor(0);
-      setBackMotor(0);
+			setAllMotors(0);
     }
   }
 
   // wait for full loop time
   while (micros() < (lastTimeStamp + LOOP_TIME)) {}
+	// set last time stamp
   lastTimeStamp = micros();
 
   gyro = readGyro();
@@ -169,12 +165,8 @@ void loop() {
 		setFrontMotor(throt + pitch_pid - yaw_p);
 		setBackMotor(throt - pitch_pid - yaw_p);
 	} else {
-		setLeftMotor(0);
-		setRightMotor(0);
-		setFrontMotor(0);
-		setBackMotor(0);
+		setAllMotors(0);
 	}
 
 }
-
 

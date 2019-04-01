@@ -2,6 +2,14 @@ Servo back;
 Servo front;
 Servo left;
 Servo right;
+
+void setAllMotors(int val) {
+  setBackMotor(val);
+  setFrontMotor(val);
+  setLeftMotor(val);
+  setRightMotor(val);
+}
+
 void setFrontMotor(int val) {
   front.writeMicroseconds(val + 1000);
 }
@@ -27,39 +35,25 @@ void initMotors() {
   delay(2600);
 
 
-  back.writeMicroseconds(1000);
-  front.writeMicroseconds(1000);
-  left.writeMicroseconds(1000);
-  right.writeMicroseconds(1000);
+	setAllMotors(1000);
   delay(2600);
 
   for (int i = 1000; i < 1500; i += 10) {
-    back.writeMicroseconds(i);
-    front.writeMicroseconds(i);
-    left.writeMicroseconds(i);
-    right.writeMicroseconds(i);
+		setAllMotors(i);
   }
   digitalWrite(LED_BUILTIN, HIGH);
   delay(2600);
 
   for (int i = 1490; i > 1000; i -= 10) {
-    back.writeMicroseconds(i);
-    front.writeMicroseconds(i);
-    left.writeMicroseconds(i);
-    right.writeMicroseconds(i);
+		setAllMotors(i);
   }
   digitalWrite(LED_BUILTIN, LOW);
   delay(2600);
 
-  setBackMotor(100);
-  setFrontMotor(100);
-  setLeftMotor(100);
-  setRightMotor(100);
+	setAllMotors(100);
   digitalWrite(LED_BUILTIN, HIGH);
   delay(2000);
-  setBackMotor(0);
-  setFrontMotor(0);
-  setLeftMotor(0);
-  setRightMotor(0);
+	setAllMotors(0);
   digitalWrite(LED_BUILTIN, LOW);
 }
+
