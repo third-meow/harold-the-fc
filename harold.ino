@@ -32,13 +32,11 @@ void flashDelay(int len) {
 // setup bno055
 void initIMU() {
   while (bno.begin() == false) {
-    Serial.println("BNO055 not found");
     flashDelay(200);
   }
 
   bno.setExtCrystalUse(true);
   while (true) {
-    Serial.println("BNO055 Calibrating");
 
     uint8_t sys, gy, acl, mg = -1;
     bno.getCalibration(&sys, &gy, &acl, &mg);
@@ -181,7 +179,6 @@ void setup() {
 void loop() {
 
   if (micros() > (lastTimeStamp + LOOP_TIME)) {
-    Serial.println("TOO SLOW, LOOP TIME MET!. THIS IS BAD!");
     while (true) {
       flashDelay(4000);
 
