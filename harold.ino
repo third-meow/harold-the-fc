@@ -219,10 +219,8 @@ void loop() {
   prev_roll_error = roll_error;
 
 
-	// map throttle from -40 to 120. 
-	//why -40? because pid values are in some cases added to motors 
-	//	and we need to be able to completely shutdown the motors
-	float throt = (float) map(ch3.pulseWidth, 1000, 2000, -20, 120);
+	// map throttle. 
+	float throt = (float) map(ch3.pulseWidth, 1000, 2000, -5, 220);
 	
 	setLeftMotor(throt + roll_pid);
 	setRightMotor(throt - roll_pid);
