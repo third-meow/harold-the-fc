@@ -13,6 +13,21 @@
 Adafruit_BNO055 bno(19, 0x29);
 Attitude gyro;
 
+float max_i = 43;
+
+float yaw_error;
+float yaw_p;
+
+float pitch_error;
+float prev_pitch_error = 0.0;
+float pitch_i;
+float pitch_pid;
+
+float roll_error;
+float prev_roll_error = 0.0;
+float roll_i;
+float roll_pid;
+
 struct PWMinput {
   volatile long startPulse;  // to hold pulse start time volatile
   long pulseWidth;  // to hold pulse width in microseconds
@@ -56,6 +71,21 @@ Attitude readGyro() {
 
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+float calc_pid(float p_gain, float i_gain, float d_gain, float err, float *prev_err, float *i) {
+	// P
+	float p = err * p_gain;
+	// I
+	*i = *i + (err * i_gain);
+  if (*i > max_i) *i = max_i;
+  if (*i < -max_i) *i = -max_i;
+	// D
+	float d = (err - *prev_err) * d_gain;
+	// prev err
+	*prev_err = err;
+
+	// PID
+	return (p + *i + d);
+}
 
 
 
@@ -63,24 +93,6 @@ Attitude readGyro() {
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 unsigned long lastTimeStamp;
 
-float max_i = 43;
-
-float yaw_error;
-float yaw_p;
-
-float pitch_error;
-float prev_pitch_error = 0.0;
-float pitch_p;
-float pitch_i;
-float pitch_d;
-float pitch_pid;
-
-float roll_error;
-float prev_roll_error = 0.0;
-float roll_p;
-float roll_i;
-float roll_d;
-float roll_pid;
 
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
@@ -134,23 +146,10 @@ void loop() {
 
 
   pitch_error = desired_pitch - gyro.pitch;
-  pitch_p = pitch_error * 1.16;
-  pitch_i = pitch_i + (pitch_error * 0.01);
-  if (pitch_i > max_i) pitch_i = max_i;
-  if (pitch_i < -max_i) pitch_i = -max_i;
-  pitch_d = (pitch_error - prev_pitch_error) * 0.26;
-  pitch_pid = pitch_p + pitch_i + pitch_d;
-  prev_pitch_error = pitch_error;
+  pitch_pid = calc_pid(1.16, 0.01,  0.26, pitch_error, &prev_pitch_error, &pitch_i);
 
   roll_error = desired_roll - gyro.roll;
-  roll_p = roll_error * 1.16;
-  roll_i = roll_i + (roll_error * 0.01);
-  if (roll_i > max_i) roll_i = max_i;
-  if (roll_i < -max_i) roll_i = -max_i;
-  roll_d = (roll_error - prev_roll_error) * 0.26;
-  roll_pid = roll_p + roll_i + roll_d;
-  prev_roll_error = roll_error;
-
+  roll_pid = calc_pid(1.16, 0.01,  0.26, roll_error, &prev_roll_error, &roll_i);
 
 	yaw_error = desired_yaw - gyro.yaw;
 	yaw_p = yaw_error * 0.5;
@@ -169,4 +168,6 @@ void loop() {
 	}
 
 }
+
+
 
