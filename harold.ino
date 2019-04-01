@@ -14,8 +14,8 @@ Adafruit_BNO055 bno(19, 0x29);
 Attitude gyro;
 
 struct PWMinput {
-  volatile long startPulse;  //to hold pulse start time volatile
-  long pulseWidth;  //to hold pulse width in microseconds
+  volatile long startPulse;  // to hold pulse start time volatile
+  long pulseWidth;  // to hold pulse width in microseconds
 } ch1, ch2, ch3, ch4, ch5, ch6;
 
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -29,7 +29,7 @@ void flashDelay(int len) {
 
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-//setup bno055
+// setup bno055
 void initIMU() {
   while (bno.begin() == false) {
     Serial.println("BNO055 not found");
@@ -50,7 +50,7 @@ void initIMU() {
   }
 }
 
-//read gyro values
+// read gyro values
 Attitude readGyro() {
   imu::Vector<3> vec = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
   Attitude att(vec.x(), vec.y(), vec.z());
@@ -152,7 +152,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 
-  //setup bno055 gyro/accel
+  // setup bno055 gyro/accel
   initIMU();
   while (!bno.begin()) {
     delay(200);
@@ -160,9 +160,9 @@ void setup() {
   }
   digitalWrite(LED_BUILTIN, HIGH);
 
-  //setup receiver
+  // setup receiver
   initReceiver();
-  //setup motors
+  // setup motors
   initMotors();
 
 
@@ -189,7 +189,7 @@ void loop() {
     }
   }
 
-  //wait for full loop time
+  // wait for full loop time
   while (micros() < (lastTimeStamp + LOOP_TIME)) {}
   lastTimeStamp = micros();
 
