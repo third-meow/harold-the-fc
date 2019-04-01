@@ -201,7 +201,7 @@ void loop() {
 
 
   pitch_error = desired_pitch - gyro.pitch;
-  pitch_p = pitch_error * 0.86;
+  pitch_p = pitch_error * 1.16;
   pitch_i = pitch_i + (pitch_error * 0.003);
   if (pitch_i > max_i) pitch_i = max_i;
   if (pitch_i < -max_i) pitch_i = -max_i;
@@ -210,7 +210,7 @@ void loop() {
   prev_pitch_error = pitch_error;
 
   roll_error = desired_roll - gyro.roll;
-  roll_p = roll_error * 0.86;
+  roll_p = roll_error * 1.16;
   roll_i = roll_i + (roll_error * 0.003);
   if (roll_i > max_i) roll_i = max_i;
   if (roll_i < -max_i) roll_i = -max_i;
