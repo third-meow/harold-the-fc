@@ -232,10 +232,10 @@ void loop() {
 	float throt = (float) map(ch3.pulseWidth, 1000, 2000, -5, 220);
 	
 	if (throt > 0) {
-		setLeftMotor(throt + yaw_p);
-		setRightMotor(throt + yaw_p);
-		setFrontMotor(throt - yaw_p);
-		setBackMotor(throt - yaw_p);
+		setLeftMotor(throt + roll_pid + yaw_p);
+		setRightMotor(throt - roll_pid + yaw_p);
+		setFrontMotor(throt + pitch_pid - yaw_p);
+		setBackMotor(throt - pitch_pid - yaw_p);
 	} else {
 		setLeftMotor(0);
 		setRightMotor(0);
