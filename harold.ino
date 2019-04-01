@@ -133,6 +133,9 @@ unsigned long lastTimeStamp;
 
 float max_i = 33;
 
+float yaw_error;
+float yaw_p;
+
 float pitch_error;
 float prev_pitch_error = 0.0;
 float pitch_p;
@@ -195,9 +198,11 @@ void loop() {
 
   gyro = readGyro();
   //float desired_pitch = (float) map(ch2.pulseWidth, 1000, 2000, -50, 50);
+  float desired_pitch = 0.0;
   //float desired_roll = (float) map(ch1.pulseWidth, 1000, 2000, -50, 50);
   float desired_roll = 0.0;
-  float desired_pitch = 0.0;
+  //float desired_yaw = (float) map(ch4.pulseWidth, 1000, 2000, -50, 50);
+  float desired_yaw = 0.0;
 
 
   pitch_error = desired_pitch - gyro.pitch;
@@ -219,14 +224,18 @@ void loop() {
   prev_roll_error = roll_error;
 
 
-	// map throttle. 
+	yaw_error = desired_yaw - gyro.yaw;
+	yaw_p = yaw_error * 0.5;
+
+
+	// map throttle 
 	float throt = (float) map(ch3.pulseWidth, 1000, 2000, -5, 220);
 	
 	if (throt > 0) {
-		setLeftMotor(throt + roll_pid);
-		setRightMotor(throt - roll_pid);
-		setFrontMotor(throt + pitch_pid);
-		setBackMotor(throt - pitch_pid);
+		setLeftMotor(throt + yaw_p);
+		setRightMotor(throt + yaw_p);
+		setFrontMotor(throt - yaw_p);
+		setBackMotor(throt - yaw_p);
 	} else {
 		setLeftMotor(0);
 		setRightMotor(0);
@@ -235,9 +244,4 @@ void loop() {
 	}
 
 }
-
-
-
-
-
 
