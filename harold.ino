@@ -222,11 +222,22 @@ void loop() {
 	// map throttle. 
 	float throt = (float) map(ch3.pulseWidth, 1000, 2000, -5, 220);
 	
-	setLeftMotor(throt + roll_pid);
-	setRightMotor(throt - roll_pid);
-	setFrontMotor(throt + pitch_pid);
-	setBackMotor(throt - pitch_pid);
+	if (throt > 0) {
+		setLeftMotor(throt + roll_pid);
+		setRightMotor(throt - roll_pid);
+		setFrontMotor(throt + pitch_pid);
+		setBackMotor(throt - pitch_pid);
+	} else {
+		setLeftMotor(0);
+		setRightMotor(0);
+		setFrontMotor(0);
+		setBackMotor(0);
+	}
+
 }
+
+
+
 
 
 
