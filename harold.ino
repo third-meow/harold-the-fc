@@ -124,12 +124,12 @@ void loop() {
   lastTimeStamp = micros();
 
   gyro = readGyro();
-  //float desired_pitch = (float) map(ch2.pulseWidth, 1000, 2000, -50, 50);
-  float desired_pitch = 0.0;
-  //float desired_roll = (float) map(ch1.pulseWidth, 1000, 2000, -50, 50);
-  float desired_roll = 0.0;
-  //float desired_yaw = (float) map(ch4.pulseWidth, 1000, 2000, -50, 50);
-  float desired_yaw = 0.0;
+  float desired_pitch = (float) map(ch2.pulseWidth, 1000, 2000, -50, 50);
+  //float desired_pitch = 0.0;
+  float desired_roll = (float) map(ch1.pulseWidth, 1000, 2000, -50, 50);
+  //float desired_roll = 0.0;
+  float desired_yaw = (float) map(ch4.pulseWidth, 1000, 2000, -50, 50);
+  //float desired_yaw = 0.0;
 
 
   pitch_error = desired_pitch - gyro.pitch;
