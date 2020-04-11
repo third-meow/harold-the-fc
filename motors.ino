@@ -20,8 +20,8 @@ void setRightMotor(int val) {
 
 void initMotors() {
   digitalWrite(LED_BUILTIN, LOW);
-  back.attach(PB1);
-  front.attach(PA10);
+  back.attach(PA10);
+  front.attach(PB1);
   left.attach(PA9);
   right.attach(PA8);
   delay(2600);
