@@ -144,7 +144,7 @@ void loop() {
   digitalWrite(LED_BUILTIN, HIGH);
 
   pitch_error = desired_pitch - gyro.pitch;
-  pitch_p = pitch_error * 1.2;
+  pitch_p = pitch_error * 0.8;
   pitch_i = pitch_i + (pitch_error * 0.01);
   if (pitch_i > max_i) {
     pitch_i = max_i;
@@ -158,7 +158,7 @@ void loop() {
   prev_pitch_error = pitch_error;
 
   roll_error = desired_roll - gyro.roll;
-  roll_p = roll_error * 1.2;
+  roll_p = roll_error * 0.8;
   roll_i = roll_i + (roll_error * 0.01);
   if (roll_i > max_i) {
     roll_i = max_i;
@@ -172,7 +172,7 @@ void loop() {
   prev_roll_error = roll_error;
 
   yaw_error = desired_yaw - gyro.yaw;
-  yaw_p = yaw_error * 0.0;
+  yaw_p = yaw_error * 0.7;
 
 
   // map throttle
