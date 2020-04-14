@@ -6,13 +6,15 @@
 
 #include "Attitude.h"
 
-#define LOOP_TIME 4000
+#define LOOP_TIME 4500
 #define LED_BUILTIN PC13
 
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 Adafruit_BNO055 bno(19, 0x29);
+imu::Vector<3> vec;
 Attitude gyro;
+Attitude euler;
 
 struct PWMinput {
   volatile long startPulse;  // to hold pulse start time volatile
@@ -43,7 +45,7 @@ void initIMU() {
     sys = gy = acl = mg = 0;
     bno.getCalibration(&sys, &gy, &acl, &mg);
 
-    if (gy == 3) {
+    if (gy == 3 && acl >= 2) {
       break;
     }
   }
@@ -54,8 +56,15 @@ Attitude readGyro() {
   /*
    * these are all in radians / second !!
    */
-  imu::Vector<3> vec = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
+  vec = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
   Attitude att(vec.x(), vec.y(), vec.z());
+  return att;
+}
+
+// read orentation values (in degrees)
+Attitude readOrientation() {
+  vec = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
+  Attitude att(vec.z(), vec.y(), vec.x());
   return att;
 }
 
@@ -63,10 +72,25 @@ Attitude readGyro() {
 
 unsigned long lastTimeStamp;
 
-float max_i = 85; // should prob be 45;
+const float MAX_I = 85; // should prob be 45;
+const float STAB_MAX_I = 5;
 
 float yaw_error;
 float yaw_p;
+
+float stab_pitch_error;
+float stab_prev_pitch_error = 0.0;
+float stab_pitch_p;
+float stab_pitch_i;
+float stab_pitch_d;
+float stab_pitch_pid;
+
+float stab_roll_error;
+float stab_prev_roll_error = 0.0;
+float stab_roll_p;
+float stab_roll_i;
+float stab_roll_d;
+float stab_roll_pid;
 
 float pitch_error;
 float prev_pitch_error = 0.0;
@@ -128,54 +152,65 @@ void loop() {
   lastTimeStamp = micros();
 
 
-  /*
-   * these are all in radians / second !!
-   */
-  gyro = readGyro();
+  
   float desired_pitch = 0.0;
   float desired_roll = 0.0;
   float desired_yaw = 0.0;
-  //float desired_pitch = (float) map(ch2.pulseWidth, 1000, 2000, -50, 50);
-  //float desired_roll = (float) map(ch1.pulseWidth, 1000, 2000, -50, 50);
-  //float desired_yaw = (float) map(ch4.pulseWidth, 1000, 2000, -50, 50);
+  //float desired_pitch = (float) map(ch2.pulseWidth, 1000, 2000, -20, 20);
+  //float desired_roll = (float) map(ch1.pulseWidth, 1000, 2000, -20, 20);
+  //float desired_yaw = (float) map(ch4.pulseWidth, 1000, 2000, -10, 10;
+
+  /*
+   * these are in radians / second !!
+   */
+  gyro = readGyro();
+  /*
+   * these are in degrees !!
+   */
+  euler = readOrientation();
+
+  stab_pitch_error = -(desired_pitch - euler.pitch);
+  stab_pitch_p = stab_pitch_error * 0.9;
+  stab_pitch_i = 0;//stab_pitch_i + (stab_pitch_error * 0.003);
+  if (stab_pitch_i > STAB_MAX_I) stab_pitch_i = STAB_MAX_I;
+  if (stab_pitch_i < -STAB_MAX_I) stab_pitch_i = -STAB_MAX_I;
+  stab_pitch_d = (stab_pitch_error - stab_prev_pitch_error) * 0.5;
+  stab_pitch_pid = stab_pitch_p + stab_pitch_i + stab_pitch_d;
+  stab_prev_pitch_error = stab_pitch_error;
+
+  stab_roll_error = -(desired_roll - euler.roll);
+  stab_roll_p = stab_roll_error * 0.9;
+  stab_roll_i = 0;//stab_roll_i + (stab_roll_error * 0.003);
+  if (stab_roll_i > STAB_MAX_I) stab_roll_i = STAB_MAX_I;
+  if (stab_roll_i < -STAB_MAX_I) stab_roll_i = -STAB_MAX_I;
+  stab_roll_d = (stab_roll_error - stab_prev_roll_error) * 0.5;
+  stab_roll_pid = stab_roll_p + stab_roll_i + stab_roll_d;
+  stab_prev_roll_error = stab_roll_error;
   
 
-
-  digitalWrite(LED_BUILTIN, HIGH);
-
-  pitch_error = desired_pitch - gyro.pitch;
-  pitch_p = pitch_error * 0.8;
+  pitch_error = stab_pitch_pid - gyro.pitch;
+  pitch_p = pitch_error * 0.8 ;
   pitch_i = pitch_i + (pitch_error * 0.01);
-  if (pitch_i > max_i) {
-    pitch_i = max_i;
-    digitalWrite(LED_BUILTIN, LOW);
-  } else if (pitch_i < -max_i) {
-    pitch_i = -max_i;
-    digitalWrite(LED_BUILTIN, LOW);
-  }
-  pitch_d = (pitch_error - prev_pitch_error) * 0.4; //0.4 seems good
+  if (pitch_i > MAX_I) pitch_i = MAX_I;
+  if (pitch_i < -MAX_I) pitch_i = -MAX_I;
+  pitch_d = (pitch_error - prev_pitch_error) * 0.4;
   pitch_pid = pitch_p + pitch_i + pitch_d;
   prev_pitch_error = pitch_error;
 
-  roll_error = desired_roll - gyro.roll;
+  roll_error = stab_roll_pid - gyro.roll;
   roll_p = roll_error * 0.8;
   roll_i = roll_i + (roll_error * 0.01);
-  if (roll_i > max_i) {
-    roll_i = max_i;
-    digitalWrite(LED_BUILTIN, LOW);
-  } else if (roll_i < -max_i) {
-    roll_i = -max_i;
-    digitalWrite(LED_BUILTIN, LOW);
-  }
+  if (roll_i > MAX_I) roll_i = MAX_I;
+  if (roll_i < -MAX_I) roll_i = -MAX_I;
   roll_d = (roll_error - prev_roll_error) * 0.4;
   roll_pid = roll_p + roll_i + roll_d;
   prev_roll_error = roll_error;
 
   yaw_error = desired_yaw - gyro.yaw;
   yaw_p = yaw_error * 0.7;
+  
 
 
-  // map throttle
   float throt = (float) map(ch3.pulseWidth, 1000, 2000, -5, 450);
   //float throt = 100;
 
@@ -190,6 +225,9 @@ void loop() {
     //reset intergrals
     pitch_i = 0;
     roll_i = 0;
+
+    stab_pitch_i = 0;
+    stab_roll_i = 0;
     
     setLeftMotor(0);
     setRightMotor(0);

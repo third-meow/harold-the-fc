@@ -3,19 +3,23 @@ Servo front;
 Servo left;
 Servo right;
 void setFrontMotor(int val) {
-  front.writeMicroseconds(val + 1000);
+  val += 1000;
+  front.writeMicroseconds(min(max(val, 1000), 2000));
 }
 
 void setBackMotor(int val) {
-  back.writeMicroseconds(val + 1000);
+  val += 1000;
+  back.writeMicroseconds(min(max(val, 1000), 2000));
 }
 
 void setLeftMotor(int val) {
-  left.writeMicroseconds(val + 1000);
+  val += 1000;
+  left.writeMicroseconds(min(max(val, 1000), 2000));
 }
 
 void setRightMotor(int val) {
-  right.writeMicroseconds(val + 1000);
+  val += 1000;
+  right.writeMicroseconds(min(max(val, 1000), 2000));
 }
 
 void initMotors() {
