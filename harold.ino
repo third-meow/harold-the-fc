@@ -73,7 +73,7 @@ Attitude readOrientation() {
 unsigned long lastTimeStamp;
 
 const float MAX_I = 85; // should prob be 45;
-const float STAB_MAX_I = 5;
+const float STAB_MAX_I = 15;
 
 float yaw_error;
 float yaw_p;
@@ -151,12 +151,12 @@ void loop() {
   while (micros() < (lastTimeStamp + LOOP_TIME)) {}
   lastTimeStamp = micros();
 
-
+  digitalWrite(LED_BUILTIN, HIGH);
   
-  float desired_pitch = 0.0;
+  //float desired_pitch = 0.0;
   float desired_roll = 0.0;
   float desired_yaw = 0.0;
-  //float desired_pitch = (float) map(ch2.pulseWidth, 1000, 2000, -20, 20);
+  float desired_pitch = (float) map(ch2.pulseWidth, 1000, 2000, -20, 20);
   //float desired_roll = (float) map(ch1.pulseWidth, 1000, 2000, -20, 20);
   //float desired_yaw = (float) map(ch4.pulseWidth, 1000, 2000, -10, 10;
 
@@ -170,26 +170,40 @@ void loop() {
   euler = readOrientation();
 
   stab_pitch_error = -(desired_pitch - euler.pitch);
-  stab_pitch_p = stab_pitch_error * 0.9;
-  stab_pitch_i = 0;//stab_pitch_i + (stab_pitch_error * 0.003);
-  if (stab_pitch_i > STAB_MAX_I) stab_pitch_i = STAB_MAX_I;
-  if (stab_pitch_i < -STAB_MAX_I) stab_pitch_i = -STAB_MAX_I;
-  stab_pitch_d = (stab_pitch_error - stab_prev_pitch_error) * 0.5;
+  stab_pitch_p = stab_pitch_error * 2.0; //2 seems good
+  stab_pitch_i = stab_pitch_i + (stab_pitch_error * 0.005);
+  if (stab_pitch_i > STAB_MAX_I) {
+    stab_pitch_i = STAB_MAX_I;
+    digitalWrite(LED_BUILTIN, LOW);
+  }
+  if (stab_pitch_i < -STAB_MAX_I){
+    stab_pitch_i = -STAB_MAX_I;
+    digitalWrite(LED_BUILTIN, LOW);
+
+  }
+  stab_pitch_d = (stab_pitch_error - stab_prev_pitch_error) * 0.7;
   stab_pitch_pid = stab_pitch_p + stab_pitch_i + stab_pitch_d;
   stab_prev_pitch_error = stab_pitch_error;
 
   stab_roll_error = -(desired_roll - euler.roll);
-  stab_roll_p = stab_roll_error * 0.9;
-  stab_roll_i = 0;//stab_roll_i + (stab_roll_error * 0.003);
-  if (stab_roll_i > STAB_MAX_I) stab_roll_i = STAB_MAX_I;
-  if (stab_roll_i < -STAB_MAX_I) stab_roll_i = -STAB_MAX_I;
-  stab_roll_d = (stab_roll_error - stab_prev_roll_error) * 0.5;
+  stab_roll_p = stab_roll_error * 2.0;
+  stab_roll_i = stab_roll_i + (stab_roll_error * 0.005);
+  if (stab_roll_i > STAB_MAX_I) {
+    stab_roll_i = STAB_MAX_I;
+  }
+  if (stab_roll_i < -STAB_MAX_I) {
+    stab_roll_i = -STAB_MAX_I;
+  }
+  stab_roll_d = (stab_roll_error - stab_prev_roll_error) * 0.7;
   stab_roll_pid = stab_roll_p + stab_roll_i + stab_roll_d;
   stab_prev_roll_error = stab_roll_error;
   
 
   pitch_error = stab_pitch_pid - gyro.pitch;
-  pitch_p = pitch_error * 0.8 ;
+  // RATE P GAIN SHOULD BE:
+  // WHEN FLYING: 0.8
+  // WHEN IN RIG: 1.2
+  pitch_p = pitch_error * 0.8;
   pitch_i = pitch_i + (pitch_error * 0.01);
   if (pitch_i > MAX_I) pitch_i = MAX_I;
   if (pitch_i < -MAX_I) pitch_i = -MAX_I;
@@ -198,6 +212,9 @@ void loop() {
   prev_pitch_error = pitch_error;
 
   roll_error = stab_roll_pid - gyro.roll;
+    // RATE P GAIN SHOULD BE:
+  // WHEN FLYING: 0.8
+  // WHEN IN RIG: 1.2
   roll_p = roll_error * 0.8;
   roll_i = roll_i + (roll_error * 0.01);
   if (roll_i > MAX_I) roll_i = MAX_I;
