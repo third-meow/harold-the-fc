@@ -156,7 +156,7 @@ void loop() {
   //float desired_pitch = 0.0;
   float desired_roll = 0.0;
   float desired_yaw = 0.0;
-  float desired_pitch = (float) map(ch2.pulseWidth, 1000, 2000, -20, 20);
+  float desired_pitch = (float) map(ch2.pulseWidth, 1000, 2000, -10, 10);
   //float desired_roll = (float) map(ch1.pulseWidth, 1000, 2000, -20, 20);
   //float desired_yaw = (float) map(ch4.pulseWidth, 1000, 2000, -10, 10;
 
@@ -170,7 +170,7 @@ void loop() {
   euler = readOrientation();
 
   stab_pitch_error = -(desired_pitch - euler.pitch);
-  stab_pitch_p = stab_pitch_error * 2.0; //2 seems good
+  stab_pitch_p = stab_pitch_error * 0.9; //0.9 .. seems ..okay? still gets wobbly tho
   stab_pitch_i = stab_pitch_i + (stab_pitch_error * 0.005);
   if (stab_pitch_i > STAB_MAX_I) {
     stab_pitch_i = STAB_MAX_I;
@@ -181,12 +181,12 @@ void loop() {
     digitalWrite(LED_BUILTIN, LOW);
 
   }
-  stab_pitch_d = (stab_pitch_error - stab_prev_pitch_error) * 0.7;
+  stab_pitch_d = (stab_pitch_error - stab_prev_pitch_error) * 0.8; // could up this even more?
   stab_pitch_pid = stab_pitch_p + stab_pitch_i + stab_pitch_d;
   stab_prev_pitch_error = stab_pitch_error;
 
   stab_roll_error = -(desired_roll - euler.roll);
-  stab_roll_p = stab_roll_error * 2.0;
+  stab_roll_p = stab_roll_error * 0.9;//0.9 .. seems ..okay? still gets wobbly tho
   stab_roll_i = stab_roll_i + (stab_roll_error * 0.005);
   if (stab_roll_i > STAB_MAX_I) {
     stab_roll_i = STAB_MAX_I;
@@ -194,7 +194,7 @@ void loop() {
   if (stab_roll_i < -STAB_MAX_I) {
     stab_roll_i = -STAB_MAX_I;
   }
-  stab_roll_d = (stab_roll_error - stab_prev_roll_error) * 0.7;
+  stab_roll_d = (stab_roll_error - stab_prev_roll_error) * 0.8; // could up this even more? 
   stab_roll_pid = stab_roll_p + stab_roll_i + stab_roll_d;
   stab_prev_roll_error = stab_roll_error;
   
