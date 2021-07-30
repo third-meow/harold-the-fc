@@ -11,6 +11,14 @@
 
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+Servo front;
+void setFrontMotor(int val) {
+  val += 1000;
+  front.writeMicroseconds(min(max(val, 1000), 2000));
+}
+
+//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 Adafruit_BNO055 bno(19, 0x29);
 imu::Vector<3> vec;
 Attitude gyro;
@@ -40,7 +48,7 @@ void initIMU() {
 
   bno.setExtCrystalUse(true);
   while (true) {
-    flashDelay(60);
+    flashDelay(200);
     uint8_t sys, gy, acl, mg;
     sys = gy = acl = mg = 0;
     bno.getCalibration(&sys, &gy, &acl, &mg);
@@ -72,59 +80,40 @@ Attitude readOrientation() {
 
 unsigned long lastTimeStamp;
 
-const float MAX_I = 85; // should prob be 45;
-const float STAB_MAX_I = 15;
-
-float yaw_error;
-float yaw_p;
-
-float stab_pitch_error;
-float stab_prev_pitch_error = 0.0;
-float stab_pitch_p;
-float stab_pitch_i;
-float stab_pitch_d;
-float stab_pitch_pid;
-
-float stab_roll_error;
-float stab_prev_roll_error = 0.0;
-float stab_roll_p;
-float stab_roll_i;
-float stab_roll_d;
-float stab_roll_pid;
-
-float pitch_error;
-float prev_pitch_error = 0.0;
-float pitch_p;
-float pitch_i;
-float pitch_d;
-float pitch_pid;
-
-float roll_error;
-float prev_roll_error = 0.0;
-float roll_p;
-float roll_i;
-float roll_d;
-float roll_pid;
-
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 
   // show we're alive
-  for (int i = 0; i < 40; ++i) flashDelay(50);
+	flashDelay(4000);
 
   // setup bno055 gyro/accel
   initIMU();
+
+	flashDelay(70);
+
+  // setup motor
+  digitalWrite(LED_BUILTIN, LOW);
+  front.attach(PA10);
+  delay(2600);
+  front.writeMicroseconds(1000);
+  delay(2600);
+  for (int i = 1000; i < 1500; i += 10) {
+    front.writeMicroseconds(i);
+  }
   digitalWrite(LED_BUILTIN, HIGH);
-
-  // setup receiver
-  initReceiver();
-
-  // setup motors
-  initMotors();
-
-
+  delay(2600);
+  for (int i = 1490; i > 1000; i -= 10) {
+    front.writeMicroseconds(i);
+  }
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(2600);
+  setFrontMotor(100);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(2000);
+  setFrontMotor(0);
+  digitalWrite(LED_BUILTIN, LOW);
   delay(3000);
   lastTimeStamp = micros();
 
@@ -135,123 +124,19 @@ void setup() {
 
 
 void loop() {
+	// wait for full loop time
+	while (micros() < (lastTimeStamp + LOOP_TIME)) {}
+	lastTimeStamp = micros();
 
-  if (micros() > (lastTimeStamp + LOOP_TIME)) {		// Should remove this before serious flight testing
-    while (true) {
-      flashDelay(4000);
+	digitalWrite(LED_BUILTIN, HIGH);
 
-      setLeftMotor(0);
-      setRightMotor(0);
-      setFrontMotor(0);
-      setBackMotor(0);
-    }
-  }
+	gyro = readGyro(); //these are in rads^-1
 
-  // wait for full loop time
-  while (micros() < (lastTimeStamp + LOOP_TIME)) {}
-  lastTimeStamp = micros();
-
-  digitalWrite(LED_BUILTIN, HIGH);
-  
-  //float desired_pitch = 0.0;
-  float desired_roll = 0.0;
-  float desired_yaw = 0.0;
-  float desired_pitch = (float) map(ch2.pulseWidth, 1000, 2000, -10, 10);
-  //float desired_roll = (float) map(ch1.pulseWidth, 1000, 2000, -20, 20);
-  //float desired_yaw = (float) map(ch4.pulseWidth, 1000, 2000, -10, 10;
-
-  /*
-   * these are in radians / second !!
-   */
-  gyro = readGyro();
-  /*
-   * these are in degrees !!
-   */
-  euler = readOrientation();
-
-  stab_pitch_error = -(desired_pitch - euler.pitch);
-  stab_pitch_p = stab_pitch_error * 0.9; //0.9 .. seems ..okay? still gets wobbly tho
-  stab_pitch_i = stab_pitch_i + (stab_pitch_error * 0.005);
-  if (stab_pitch_i > STAB_MAX_I) {
-    stab_pitch_i = STAB_MAX_I;
-    digitalWrite(LED_BUILTIN, LOW);
-  }
-  if (stab_pitch_i < -STAB_MAX_I){
-    stab_pitch_i = -STAB_MAX_I;
-    digitalWrite(LED_BUILTIN, LOW);
-
-  }
-  stab_pitch_d = (stab_pitch_error - stab_prev_pitch_error) * 0.8; // could up this even more?
-  stab_pitch_pid = stab_pitch_p + stab_pitch_i + stab_pitch_d;
-  stab_prev_pitch_error = stab_pitch_error;
-
-  stab_roll_error = -(desired_roll - euler.roll);
-  stab_roll_p = stab_roll_error * 0.9;//0.9 .. seems ..okay? still gets wobbly tho
-  stab_roll_i = stab_roll_i + (stab_roll_error * 0.005);
-  if (stab_roll_i > STAB_MAX_I) {
-    stab_roll_i = STAB_MAX_I;
-  }
-  if (stab_roll_i < -STAB_MAX_I) {
-    stab_roll_i = -STAB_MAX_I;
-  }
-  stab_roll_d = (stab_roll_error - stab_prev_roll_error) * 0.8; // could up this even more? 
-  stab_roll_pid = stab_roll_p + stab_roll_i + stab_roll_d;
-  stab_prev_roll_error = stab_roll_error;
-  
-
-  pitch_error = stab_pitch_pid - gyro.pitch;
-  // RATE P GAIN SHOULD BE:
-  // WHEN FLYING: 0.8
-  // WHEN IN RIG: 1.2
-  pitch_p = pitch_error * 0.8;
-  pitch_i = pitch_i + (pitch_error * 0.01);
-  if (pitch_i > MAX_I) pitch_i = MAX_I;
-  if (pitch_i < -MAX_I) pitch_i = -MAX_I;
-  pitch_d = (pitch_error - prev_pitch_error) * 0.4;
-  pitch_pid = pitch_p + pitch_i + pitch_d;
-  prev_pitch_error = pitch_error;
-
-  roll_error = stab_roll_pid - gyro.roll;
-    // RATE P GAIN SHOULD BE:
-  // WHEN FLYING: 0.8
-  // WHEN IN RIG: 1.2
-  roll_p = roll_error * 0.8;
-  roll_i = roll_i + (roll_error * 0.01);
-  if (roll_i > MAX_I) roll_i = MAX_I;
-  if (roll_i < -MAX_I) roll_i = -MAX_I;
-  roll_d = (roll_error - prev_roll_error) * 0.4;
-  roll_pid = roll_p + roll_i + roll_d;
-  prev_roll_error = roll_error;
-
-  yaw_error = desired_yaw - gyro.yaw;
-  yaw_p = yaw_error * 0.7;
-  
-
-
-  float throt = (float) map(ch3.pulseWidth, 1000, 2000, -5, 450);
-  //float throt = 100;
-
-
-  if (throt > 0) {
-    setLeftMotor(throt + roll_pid - yaw_p);
-    setRightMotor(throt - roll_pid - yaw_p);
-    setFrontMotor(throt + pitch_pid + yaw_p);
-    setBackMotor(throt - pitch_pid + yaw_p);
-  } else {
-
-    //reset intergrals
-    pitch_i = 0;
-    roll_i = 0;
-
-    stab_pitch_i = 0;
-    stab_roll_i = 0;
-    
-    setLeftMotor(0);
-    setRightMotor(0);
-    setFrontMotor(0);
-    setBackMotor(0);
-  }
-
+	if (gyro.pitch > 2.) {
+		setFrontMotor(0);
+		delay(5);
+	}
+	else {
+		setFrontMotor(100);
+	}
 }
-
-

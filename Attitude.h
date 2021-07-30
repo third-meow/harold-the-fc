@@ -12,18 +12,3 @@ struct Attitude {
     yaw = y;
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
