@@ -85,8 +85,10 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 
-  // show we're alive
-	flashDelay(4000);
+  // show we're alive and/or we've just reset
+	tone(PA5, 4000);
+	delay(1000);
+	noTone(PA5);
 
   // setup bno055 gyro/accel
   initIMU();
