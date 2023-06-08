@@ -1,6 +1,6 @@
 # harold-the-fc
 Harold the flight controller is an arduino based quadcopter flight controller with semi-autonomous capability and a range of safety features.
-[WORK IN PROGRESS]
+[EXPERIMENTAL - USE AT YOUR OWN RISK]
 
 ![IMG_20180319_183826](https://user-images.githubusercontent.com/25115039/229012596-b87aaa5e-9903-4fee-949b-45f3c1a45c82.jpg)
 ![IMG20200412110242](https://user-images.githubusercontent.com/25115039/229012756-1737c33f-b1b6-4833-9c78-0d6e1b692b78.jpg)
